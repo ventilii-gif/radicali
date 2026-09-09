@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f9fafb">
+<meta name="description" content="App didattica interattiva sui radicali: radici n-esime e condizioni di esistenza, proprietà e semplificazione, operazioni, razionalizzazione, potenze a esponente razionale. Teoria, simulazioni, esercizi guidati e quiz.">
+<title>Radicali · Algebra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<script>/* imposta il tema prima del render per evitare il flash */
+(function(){try{var t=localStorage.getItem('radicali-theme');
+if(!t)t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+/* ===================== Design system ===================== */
+:root{
+  --color-primary:#2563eb;      /* Blu primario */
+  --color-secondary:#1e40af;
+  --color-accent:#f59e0b;       /* Arancio per highlight */
+  --color-success:#1d70bf;      /* «corretto» = blu (accessibile ai daltonici) */
+  --color-error:#d97706;        /* «errato» = arancio (mai rosso/verde) */
+  --color-bg:#f9fafb;
+  --color-text:#1f2937;
+  --surface:#ffffff;
+  --border:#e5e7eb;
+  --muted:#6b7280;
+  --primary-soft:#eff6ff;
+  --accent-soft:#fef3c7;
+  --accent-deep:#b45309;
+  --success-soft:#e7f0fa;
+  --success-deep:#12467e;
+  --error-soft:#fde4c8;
+  --error-deep:#b45309;
+  --violet:#7c3aed;
+  --violet-soft:#f5f3ff;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(17,24,39,.07);
+  --font-math:"Cambria Math","STIX Two Math","Times New Roman",serif;
+  --canvas-bg:#ffffff;
+  --chart-grid:#eef1f6;
+  --chart-axis:#9ca3af;
+  --chart-label:#9ca3af;
+  --chart-halo:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--color-bg);color:var(--color-text);
+  font-family:"Inter","Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(15px,2.3vw,16.5px);line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid rgba(37,99,235,.45);outline-offset:2px}
+
+/* ===================== Header ===================== */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 1rem .8rem}
+header .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+header h1{font-family:"Fraunces",Georgia,serif;font-size:clamp(1.12rem,3.8vw,1.45rem);font-weight:800;letter-spacing:-.02em;color:var(--color-text)}
+header .sub{color:var(--muted);font-size:.82em;font-weight:500}
+.titles{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;min-width:0}
+
+/* ===================== Nav ===================== */
+nav.main{background:var(--surface);border-bottom:1px solid var(--border);position:static;z-index:30;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+nav.main .wrap{max-width:1000px;margin:0 auto;display:flex;gap:.4rem;padding:.55rem 1rem}
+nav.main button{flex:0 0 auto;background:var(--color-bg);border:1px solid var(--border);border-radius:999px;padding:.42rem .95rem;font-size:.85em;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:600;min-height:36px;transition:background .15s,border-color .15s,color .15s}
+nav.main button:hover:not(.active){background:var(--primary-soft);border-color:var(--color-primary);color:var(--color-secondary)}
+nav.main button.active{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
+nav.main .grp{flex:0 0 auto;align-self:center;font-size:.7em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 .1rem 0 .5rem}
+nav.main .grp:first-child{padding-left:.1rem}
+
+/* ===================== Layout ===================== */
+main{padding:1.2rem 1rem 2.6rem;max-width:1000px;margin:0 auto}
+section.scene{display:none}
+section.scene.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page-head{margin:.2rem 0 1rem;border-left:4px solid var(--color-primary);padding-left:.75rem}
+.page-head.v{border-left-color:var(--violet)}
+.page-head h2{font-size:clamp(1.18rem,3.6vw,1.5rem);font-weight:800;letter-spacing:-.015em}
+.page-head .lead{margin-top:.15rem}
+.sec-label{font-size:.72em;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:1.5rem 0 .45rem}
+.lead{color:var(--muted);font-size:.92em}
+
+/* ===================== Card ===================== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.15rem 1.25rem;margin-bottom:1.1rem;box-shadow:var(--shadow)}
+.card>h2{font-family:"Fraunces",Georgia,serif;font-size:1.13em;font-weight:700;letter-spacing:-.01em;margin-bottom:.45rem}
+.card h3{color:var(--color-secondary);font-size:.97em;font-weight:700;margin:.9rem 0 .3rem}
+.card p{margin:.35rem 0}
+.card ul,.card ol{margin:.4rem 0 .4rem 1.3rem}
+.card li{margin:.22rem 0}
+.card li::marker{color:var(--color-primary);font-weight:700}
+
+/* ===================== Accordion ===================== */
+.accordion details{border:1px solid var(--border);border-radius:10px;margin-bottom:.55rem;background:var(--surface);overflow:hidden}
+.accordion details[open]{border-color:#c7d6f5}
+.accordion summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.72rem 1rem;cursor:pointer;font-weight:650;font-size:.96em;transition:background .15s,color .15s}
+.accordion summary::-webkit-details-marker{display:none}
+.accordion summary:hover{background:var(--primary-soft);color:var(--color-secondary)}
+.accordion summary::after{content:"";flex:0 0 auto;width:9px;height:9px;border-right:2.2px solid var(--muted);border-bottom:2.2px solid var(--muted);transform:rotate(45deg) translate(-1px,-1px);transition:transform .25s}
+.accordion details[open] summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.acc-body{padding:.3rem 1rem .95rem;border-top:1px solid var(--border)}
+.acc-body>p:first-child{margin-top:.55rem}
+
+/* ===================== Formule e note ===================== */
+.formula{background:var(--primary-soft);border-left:3px solid var(--color-primary);padding:.55rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-family:var(--font-math);font-size:1.08em;line-height:2.1;overflow-x:auto}
+.formula.center{text-align:center}
+.formula.big{font-size:1.22em}
+.formula.violet{background:var(--violet-soft);border-left-color:var(--violet)}
+.formula .why{display:block;font-family:"Inter","Roboto",system-ui,sans-serif;font-size:.72em;color:var(--muted);line-height:1.45;margin-top:.15rem}
+.note-ok{background:var(--success-soft);border-left:3px solid var(--color-success);color:#12467e;padding:.5rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-size:.9em}
+.note-warn{background:var(--accent-soft);border-left:3px solid var(--color-accent);color:#78350f;padding:.5rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-size:.9em}
+.note-err{background:var(--error-soft);border-left:3px solid var(--color-error);color:#7a4713;padding:.5rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-size:.9em}
+.note-key{background:var(--violet-soft);border-left:3px solid var(--violet);color:#4c1d95;padding:.5rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-size:.9em}
+.sol-box{background:var(--success-soft);border:1px solid #9cc3ec;border-radius:10px;padding:.7rem 1rem;margin:.6rem 0;font-size:1em}
+.sol-box .t{font-size:.72em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--success-deep);display:block;margin-bottom:.15rem}
+
+/* ===================== Tabelle ===================== */
+.tbl-wrap{overflow-x:auto;margin:.6rem 0}
+table.tbl{border-collapse:collapse;width:100%;font-size:.88em;min-width:380px}
+.tbl th{background:var(--primary-soft);color:var(--color-secondary);text-align:left;padding:.45rem .65rem;border-bottom:2px solid var(--color-primary);font-weight:700}
+.tbl td{padding:.45rem .65rem;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .m{font-family:var(--font-math)}
+
+/* ===================== Bottoni ===================== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:8px;padding:.5rem 1.05rem;font-family:inherit;font-size:.88em;font-weight:600;cursor:pointer;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s,box-shadow .15s,transform .1s}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--color-secondary);box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.btn-ghost{background:var(--surface);border-color:var(--border);color:var(--color-secondary)}
+.btn-ghost:hover:not(:disabled){background:var(--primary-soft);border-color:var(--color-primary)}
+.btn-row{display:flex;flex-wrap:wrap;gap:.45rem;margin:.55rem 0 .1rem}
+
+/* ===================== Campi input ===================== */
+input[type=text],input[type=number],select{font-family:inherit;font-size:.92em;padding:.5rem .65rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--color-text);width:100%;min-height:40px}
+input[type=text]:focus,input[type=number]:focus,select:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.field label{display:block;font-size:.78em;font-weight:600;color:var(--muted);margin-bottom:.22rem}
+input[type=range]{accent-color:var(--color-primary);min-height:26px;width:100%}
+.ctrl{display:grid;gap:.5rem;margin:.2rem 0 .7rem}
+.ctrl label{display:flex;align-items:center;gap:.6rem;font-size:.89em}
+.ctrl label .nm{color:var(--muted);min-width:5.2em;font-weight:600}
+.ctrl label input[type=range]{flex:1;min-width:0}
+.ctrl label .v{min-width:3.2em;text-align:right;font-weight:700;color:var(--color-secondary);font-variant-numeric:tabular-nums;font-family:var(--font-math)}
+.selrow{display:flex;flex-wrap:wrap;gap:.6rem;margin:.2rem 0 .7rem}
+.selrow .field{flex:1;min-width:130px}
+
+/* ===================== Simulazioni ===================== */
+.sim-layout{display:grid;grid-template-columns:1.05fr 1fr;gap:1.15rem;align-items:start;margin-top:.6rem}
+@media(max-width:740px){.sim-layout{grid-template-columns:1fr}}
+.sim-pane,.ctrl-pane{min-width:0}
+canvas.plot{width:100%;height:auto;display:block;border:1px solid var(--border);border-radius:10px;background:var(--canvas-bg)}
+.legend{display:flex;flex-wrap:wrap;gap:.35rem;margin:.5rem 0 0;font-size:.76em}
+.legend span{display:inline-flex;align-items:center;gap:.32rem;background:var(--color-bg);padding:.18rem .55rem;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.legend i{display:inline-block;width:13px;height:5px;border-radius:3px}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.45rem;margin:.55rem 0;font-size:.87em}
+.read .it{background:var(--color-bg);padding:.42rem .6rem;border-radius:8px;border:1px solid var(--border)}
+.read .it .l{color:var(--muted);font-size:.76em;display:block;margin-bottom:.1rem;font-weight:600}
+.read .it .v{font-weight:700;font-variant-numeric:tabular-nums}
+.read .it .v.m{font-family:var(--font-math);font-variant-numeric:normal}
+.case-banner{padding:.55rem .9rem;border-radius:8px;font-weight:600;font-size:.9em;border:1px solid;margin:.55rem 0}
+.case-banner.c2{background:var(--success-soft);border-color:#9cc3ec;color:var(--success-deep)}
+.case-banner.c1{background:var(--accent-soft);border-color:#fde68a;color:var(--accent-deep)}
+.case-banner.c0{background:var(--error-soft);border-color:#f5d9b0;color:var(--error-deep)}
+.case-banner.cn{background:var(--primary-soft);border-color:#bfdbfe;color:var(--color-secondary)}
+.case-banner.cv{background:var(--violet-soft);border-color:#ddd6fe;color:var(--violet)}
+.eq-display{font-family:var(--font-math);font-size:1.3em;text-align:center;background:var(--primary-soft);border:1px solid #bfdbfe;border-radius:10px;padding:.55rem .8rem;margin-bottom:.6rem;overflow-x:auto;white-space:nowrap;line-height:2}
+.eq-display.violet{background:var(--violet-soft);border-color:#ddd6fe}
+.hint{color:var(--muted);font-size:.82em;margin:.4rem 0}
+.derivation{font-family:var(--font-math);font-size:1.05em;line-height:2.3;overflow-x:auto}
+.derivation .op{color:var(--muted);font-family:"Inter",system-ui,sans-serif;font-size:.72em;display:block;margin:.05rem 0 -.1rem}
+
+/* ===================== Passi risolutivi ===================== */
+.eqline{font-family:var(--font-math);font-size:1.02em;line-height:1.9;overflow-x:auto}
+
+/* ===================== Matematica inline ===================== */
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.12;margin:0 .12em;font-size:.94em}
+.frac .nu{padding:0 .3em}
+.frac .de{border-top:1.5px solid currentColor;padding:0 .3em}
+.rad{white-space:nowrap}
+.rad .ix{font-size:.58em;position:relative;top:-.62em;margin-right:-.34em;font-family:inherit}
+.rad .rc{border-top:1.7px solid currentColor;padding:.03em .22em 0 .12em;margin-left:.02em}
+
+/* ===================== Esercizi guidati ===================== */
+.gd-text{font-size:1em;margin:.2rem 0 .7rem;line-height:1.6}
+.gd-steps{list-style:none;counter-reset:gd;margin:.5rem 0;padding:0}
+.gd-steps li{counter-increment:gd;position:relative;padding:.5rem 0 .55rem 2.2rem;border-bottom:1px dashed var(--border)}
+.gd-steps li:last-child{border-bottom:none}
+.gd-steps li::before{content:counter(gd);position:absolute;left:0;top:.5rem;width:1.55rem;height:1.55rem;border-radius:50%;background:var(--primary-soft);color:var(--color-secondary);font-weight:700;font-size:.76em;display:flex;align-items:center;justify-content:center}
+.gd-do{font-size:.9em;color:var(--muted);margin-bottom:.2rem}
+
+/* ===================== Quiz ===================== */
+.quiz-hd{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.45rem;font-size:.84em;color:var(--muted);font-weight:600}
+.quiz-hd .score{color:var(--color-secondary)}
+.quiz-bar{background:#e5e7eb;border-radius:999px;height:6px;margin-bottom:.95rem;overflow:hidden}
+.quiz-bar i{display:block;background:var(--color-primary);height:100%;border-radius:999px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.quiz-q{font-weight:650;margin:.2rem 0 .8rem;line-height:1.55;font-size:.99em}
+.quiz-opts{display:grid;gap:.4rem;margin-bottom:.5rem}
+.quiz-btn{background:var(--color-bg);border:1.5px solid var(--border);border-radius:8px;padding:.55rem .9rem;text-align:left;cursor:pointer;font-size:.9em;font-family:inherit;color:var(--color-text);line-height:1.45;transition:background .12s,border-color .12s}
+.quiz-btn:not(:disabled):hover{background:var(--primary-soft);border-color:var(--color-primary)}
+.quiz-btn:disabled{cursor:default}
+.quiz-btn.correct{background:var(--success-soft)!important;border-color:var(--color-success)!important;color:#12467e;font-weight:650}
+.quiz-btn.wrong{background:var(--error-soft)!important;border-color:var(--color-error)!important;color:var(--error-deep)}
+.quiz-btn .mk{font-weight:800;margin-right:.35rem}
+.quiz-exp{padding:.55rem .9rem;border-radius:8px;font-size:.87em;line-height:1.55;margin:.5rem 0}
+.quiz-exp.ok{background:var(--success-soft);border-left:3px solid var(--color-success);color:#12467e}
+.quiz-exp.no{background:var(--error-soft);border-left:3px solid var(--color-error);color:#7a4713}
+.quiz-end{text-align:center;padding:1.2rem .6rem}
+.quiz-end .big{font-size:2rem;font-weight:800;color:var(--color-secondary);font-variant-numeric:tabular-nums}
+.quiz-end p{margin:.4rem 0 .9rem;color:var(--muted)}
+
+/* ===================== Home ===================== */
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem;margin:.6rem 0}
+.home-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.05rem;cursor:pointer;text-align:left;font-family:inherit;font-size:1em;color:inherit;box-shadow:var(--shadow);transition:border-color .18s,box-shadow .18s,transform .14s}
+.home-card:hover{border-color:var(--color-primary);box-shadow:0 5px 16px rgba(37,99,235,.14);transform:translateY(-2px)}
+.home-card .ico{display:block;width:44px;height:44px;margin-bottom:.5rem;color:var(--color-primary)}
+.home-card strong{display:block;color:var(--color-secondary);font-size:.99em;margin-bottom:.15rem}
+.home-card span{display:block;color:var(--muted);font-size:.84em;line-height:1.45}
+.home-card .num{float:right;font-family:var(--font-math);color:var(--border);font-size:1.5em;font-weight:800;line-height:1}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem}
+.chips em{font-style:normal;background:var(--primary-soft);color:var(--color-secondary);border-radius:999px;padding:.12rem .6rem;font-size:.72em;font-weight:700}
+.home-sep{font-size:.72em;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:1.4rem 0 .2rem;display:flex;align-items:center;gap:.6rem}
+.home-sep::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ===================== Footer ===================== */
+footer{border-top:1px solid var(--border);background:var(--surface);padding:1.1rem 1rem;text-align:center;color:var(--muted);font-size:.8em}
+footer a{color:var(--color-secondary)}
+
+@media(max-width:480px){.card{padding:.95rem .9rem}}
+
+/* ===================== Toggle tema ===================== */
+.theme-toggle{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;border:1px solid var(--border);background:var(--color-bg);color:var(--color-secondary);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.theme-toggle:hover{background:var(--primary-soft);border-color:var(--color-primary)}
+.theme-toggle .ic-sun{display:none}
+:root[data-theme="dark"] .theme-toggle .ic-moon{display:none}
+:root[data-theme="dark"] .theme-toggle .ic-sun{display:inline}
+
+/* ===================== Palette scura ===================== */
+:root[data-theme="dark"]{
+  --color-primary:#3b82f6;
+  --color-secondary:#93c5fd;
+  --color-bg:#0f172a;
+  --color-text:#e2e8f0;
+  --surface:#1e293b;
+  --border:#334155;
+  --muted:#94a3b8;
+  --primary-soft:#152a45;
+  --accent-soft:#3a2c10;
+  --accent-deep:#fbbf24;
+  --success-soft:#15273a;
+  --success-deep:#5fa0e6;
+  --error-soft:#33270f;
+  --error-deep:#e0975a;
+  --violet:#a78bfa;
+  --violet-soft:#231a42;
+  --shadow:0 1px 3px rgba(0,0,0,.45);
+  --canvas-bg:#0b1220;
+  --chart-grid:#1f2b40;
+  --chart-axis:#64748b;
+  --chart-label:#8c9bb3;
+  --chart-halo:#0b1220;
+}
+:root[data-theme="dark"] .note-ok{color:#9cc3ec}
+:root[data-theme="dark"] .note-warn{color:#fcd9a5}
+:root[data-theme="dark"] .note-err{color:#f5d9b0}
+:root[data-theme="dark"] .note-key{color:#ddd6fe}
+:root[data-theme="dark"] .quiz-btn.correct{color:#9cc3ec}
+:root[data-theme="dark"] .quiz-exp.ok{color:#9cc3ec}
+:root[data-theme="dark"] .quiz-exp.no{color:#f5d9b0}
+:root[data-theme="dark"] .quiz-bar{background:#334155}
+:root[data-theme="dark"] .sol-box{background:var(--success-soft);border-color:#22456e}
+:root[data-theme="dark"] .eq-display{border-color:#27406a}
+:root[data-theme="dark"] .eq-display.violet{border-color:#3a2d66}
+:root[data-theme="dark"] .case-banner.c2{border-color:#22456e}
+:root[data-theme="dark"] .case-banner.c1{border-color:#5a4412}
+:root[data-theme="dark"] .case-banner.c0{border-color:#5a3312}
+:root[data-theme="dark"] .case-banner.cn{border-color:#27406a}
+:root[data-theme="dark"] .case-banner.cv{border-color:#3a2d66}
+:root[data-theme="dark"] .accordion details[open]{border-color:#2c4a6e}
+:root[data-theme="dark"] .home-card .num{color:#334155}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="titles">
+      <h1>Radicali</h1>
+      <span class="sub">Algebra · numeri reali</span>
+    </div>
+    <button class="theme-toggle" id="themeBtn" type="button" aria-label="Attiva o disattiva il tema scuro" title="Tema chiaro / scuro">
+      <svg class="ic-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="main" aria-label="Sezioni">
+  <div class="wrap" id="mainNav">
+    <button data-target="home" class="active">Home</button>
+    <span class="grp">Percorso</span>
+    <button data-target="radici">1 · Radici ed esistenza</button>
+    <button data-target="proprieta">2 · Proprietà e semplificazione</button>
+    <button data-target="operazioni">3 · Operazioni</button>
+    <button data-target="razionalizzazione">4 · Razionalizzazione</button>
+    <button data-target="esponenti">5 · Esponenti razionali</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================ HOME ============================================================ -->
+<section class="scene active" id="home">
+  <div class="card">
+    <h2>Un percorso interattivo sui radicali</h2>
+    <p>Cinque capitoli che partono dall'idea di <strong>radice n-esima</strong> e arrivano alle
+       <strong>potenze a esponente razionale</strong> e alle prime espressioni irrazionali. Ogni capitolo è
+       organizzato in quattro momenti: la <strong>teoria</strong> essenziale in schede richiudibili, una
+       <strong>simulazione</strong> da esplorare muovendo i cursori, gli <strong>esercizi guidati</strong>
+       svolti passo per passo e un <strong>quiz</strong> a risposta chiusa con correzione immediata.</p>
+    <div class="chips"><em>Teoria</em><em>Simulazioni interattive</em><em>Esercizi guidati</em><em>Quiz con feedback</em><em>Funziona anche da mobile</em></div>
+  </div>
+
+  <div class="home-sep">Il percorso</div>
+  <div class="home-grid">
+    <button class="home-card" data-target="radici">
+      <span class="num">1</span>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 27l6 0 6 15 8-30 20 0"/><path d="M24 12h20" stroke="#f59e0b"/></svg>
+      <strong>Radici ed esistenza</strong>
+      <span>Radice n-esima, indice e radicando, condizioni di esistenza e √(a²)=|a|.</span>
+    </button>
+    <button class="home-card" data-target="proprieta">
+      <span class="num">2</span>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l4 0 4 10 6-20 12 0"/><path d="M27 14l6 8m0-8l-6 8" stroke="#f59e0b"/><path d="M38 30l7 0M38 24l7 0" stroke="#7c3aed"/></svg>
+      <strong>Proprietà e semplificazione</strong>
+      <span>Proprietà invariantiva, semplificazione, riduzione allo stesso indice e confronto.</span>
+    </button>
+    <button class="home-card" data-target="operazioni">
+      <span class="num">3</span>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 24l4 0 3 9 6-18 10 0"/><path d="M30 24h12M36 18v12" stroke="#f59e0b"/></svg>
+      <strong>Operazioni con i radicali</strong>
+      <span>Prodotto, quoziente, trasporto dentro e fuori, potenza e somma di radicali simili.</span>
+    </button>
+    <button class="home-card" data-target="razionalizzazione">
+      <span class="num">4</span>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22h24" stroke="#7c3aed"/><path d="M18 8h14" opacity=".6"/><path d="M12 34l3 0 3 8 5-14 8 0"/><path d="M28 30h9" stroke="#f59e0b"/></svg>
+      <strong>Razionalizzazione</strong>
+      <span>Togliere i radicali dal denominatore: caso monomio, radici n-esime e uso del coniugio.</span>
+    </button>
+    <button class="home-card" data-target="esponenti">
+      <span class="num">5</span>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34c8 0 6-20 16-20 8 0 8 16 20 8" /><text x="30" y="18" font-size="13" font-family="serif" font-style="italic" stroke="none" fill="#7c3aed">m/n</text></svg>
+      <strong>Esponenti razionali</strong>
+      <span>Potenze a esponente frazionario, proprietà estese e cenni di equazioni irrazionali.</span>
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>Come usare l'app</h2>
+    <ol>
+      <li><strong>Leggi la teoria.</strong> Apri le schede una alla volta: definizioni, formule ed esempi svolti.</li>
+      <li><strong>Esplora la simulazione.</strong> Muovi i cursori o cambia i valori: espressioni e grafici si aggiornano subito, con la conferma numerica del risultato.</li>
+      <li><strong>Segui gli esercizi guidati.</strong> Prova da solo, poi rivela un passaggio alla volta e confronta il tuo svolgimento.</li>
+      <li><strong>Mettiti alla prova col quiz.</strong> Ogni risposta riceve subito correzione e spiegazione, con il punteggio che si aggiorna.</li>
+    </ol>
+    <p class="hint">Suggerimento: tieni carta e penna accanto e usa le simulazioni per controllare i tuoi risultati.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 1 · RADICI ============================================================ -->
+<section class="scene" id="radici">
+  <div class="page-head">
+    <h2>Radici ed esistenza</h2>
+    <p class="lead">Che cos'è la radice n-esima di un numero, quando esiste tra i numeri reali e perché
+       √(a²) non è sempre a.</p>
+  </div>
+
+  <p class="sec-label">Teoria</p>
+  <div class="card">
+    <div class="accordion">
+      <details open>
+        <summary>Radice n-esima: definizione</summary>
+        <div class="acc-body">
+          <p>La <strong>radice n-esima</strong> di un numero <span class="eqline">a</span> è quel numero
+             <span class="eqline">b</span> che, elevato alla <span class="eqline">n</span>, dà
+             <span class="eqline">a</span>:</p>
+          <div class="formula center big"><span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span> = b &nbsp;⇔&nbsp; b<sup>n</sup> = a</div>
+          <p>Nel simbolo <span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span> il numero
+             <span class="eqline">n</span> (intero, <span class="eqline">n ≥ 2</span>) è l'<strong>indice</strong>,
+             mentre <span class="eqline">a</span> è il <strong>radicando</strong>. Per l'indice 2 si parla di
+             <strong>radice quadrata</strong> e l'indice si sottintende: <span class="rad">√<span class="rc">a</span></span>.
+             Per l'indice 3 si parla di <strong>radice cubica</strong>.</p>
+          <div class="formula center"><span class="rad">√<span class="rc">9</span></span> = 3 &nbsp;&nbsp;&nbsp; <span class="rad"><span class="ix">3</span>√<span class="rc">8</span></span> = 2 &nbsp;&nbsp;&nbsp; <span class="rad"><span class="ix">3</span>√<span class="rc">−8</span></span> = −2</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Condizioni di esistenza</summary>
+        <div class="acc-body">
+          <p>Che una radice esista <em>tra i numeri reali</em> dipende dalla parità dell'indice.</p>
+          <div class="tbl-wrap"><table class="tbl">
+            <tr><th>Indice</th><th>Radicando</th><th>Risultato</th><th>Esempio</th></tr>
+            <tr><td><strong>pari</strong> (2, 4, 6…)</td><td class="m">deve essere a ≥ 0</td><td>un solo valore, non negativo</td><td class="m"><span class="rad">√<span class="rc">16</span></span> = 4</td></tr>
+            <tr><td><strong>dispari</strong> (3, 5…)</td><td class="m">qualsiasi a ∈ ℝ</td><td>stesso segno del radicando</td><td class="m"><span class="rad"><span class="ix">3</span>√<span class="rc">−27</span></span> = −3</td></tr>
+          </table></div>
+          <div class="note-err">Con indice <strong>pari</strong> e radicando <strong>negativo</strong> la radice
+            <strong>non esiste</strong> nei reali: non c'è nessun numero reale che elevato a un esponente pari
+            dia un numero negativo. Ad esempio <span class="rad">√<span class="rc">−4</span></span> non esiste in ℝ.</div>
+          <div class="note-ok">La radice quadrata di un numero positivo indica <strong>solo</strong> il valore non
+            negativo (radice aritmetica): <span class="eqline">√25 = 5</span>, non ±5. Il doppio segno compare
+            quando risolviamo <span class="eqline">x² = 25 → x = ±5</span>, che è un'altra cosa.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Radice quadrata e valore assoluto</summary>
+        <div class="acc-body">
+          <p>Un errore frequente è scrivere <span class="eqline">√(a²) = a</span>. È vero solo se
+             <span class="eqline">a ≥ 0</span>. In generale la radice quadrata restituisce un valore non
+             negativo, quindi:</p>
+          <div class="formula center big"><span class="rad">√<span class="rc">a<sup>2</sup></span></span> = |a|</div>
+          <div class="formula center"><span class="rad">√<span class="rc">(−5)<sup>2</sup></span></span> = <span class="rad">√<span class="rc">25</span></span> = 5 = |−5|</div>
+          <p>Più in generale, per un indice <strong>pari</strong>
+             <span class="eqline"><span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>n</sup></span></span> = |a|</span>;
+             per un indice <strong>dispari</strong>
+             <span class="eqline"><span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>n</sup></span></span> = a</span>.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Significato geometrico</summary>
+        <div class="acc-body">
+          <p>La radice quadrata e la radice cubica hanno un'immagine geometrica immediata:</p>
+          <ul>
+            <li><span class="rad">√<span class="rc">a</span></span> è la <strong>lunghezza del lato</strong>
+                di un quadrato che ha area <span class="eqline">a</span>;</li>
+            <li><span class="rad"><span class="ix">3</span>√<span class="rc">a</span></span> è la
+                <strong>lunghezza dello spigolo</strong> di un cubo che ha volume <span class="eqline">a</span>.</li>
+          </ul>
+          <p>Un quadrato di area 9 ha lato <span class="eqline">√9 = 3</span>; un cubo di volume 8 ha spigolo
+             <span class="eqline">∛8 = 2</span>.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>I radicali e i numeri irrazionali</summary>
+        <div class="acc-body">
+          <p>Molte radici non danno un numero «tondo». <span class="eqline">√2</span> non è nessuna frazione:
+             è un <strong>numero irrazionale</strong>, con sviluppo decimale illimitato e non periodico.</p>
+          <div class="formula center"><span class="rad">√<span class="rc">2</span></span> = 1,414213… &nbsp;&nbsp;&nbsp; <span class="rad"><span class="ix">3</span>√<span class="rc">5</span></span> = 1,709975…</div>
+          <div class="note-key">Proprio perché il valore decimale è approssimato, in matematica si preferisce
+            <strong>lasciare il radicale</strong> nella forma esatta (per esempio <span class="eqline">3√2</span>)
+            invece di sostituirlo con un decimale arrotondato.</div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p class="sec-label">Simulazione · La radice n-esima</p>
+  <div class="card">
+    <p>Scegli l'<strong>indice</strong> e il <strong>radicando</strong>: osserva il grafico di
+       <span class="eqline">y = <span class="rad"><span class="ix">n</span>√<span class="rc">x</span></span></span>,
+       la zona in cui la radice esiste e il valore corrispondente.</p>
+    <div class="eq-display" id="r1eq"></div>
+    <div class="sim-layout">
+      <div class="sim-pane">
+        <canvas class="plot" id="r1Plot" width="640" height="420" aria-label="Grafico della radice n-esima"></canvas>
+        <div class="legend">
+          <span><i style="background:#2563eb"></i> y = ⁿ√x</span>
+          <span><i style="background:#f59e0b"></i> punto (a, ⁿ√a)</span>
+          <span><i style="background:#d97706"></i> zona non ammessa</span>
+        </div>
+      </div>
+      <div class="ctrl-pane">
+        <div class="ctrl">
+          <label><span class="nm">indice n</span><input type="range" id="r1n" min="2" max="7" value="2" step="1"><span class="v" id="r1nV">2</span></label>
+          <label><span class="nm">radicando a</span><input type="range" id="r1a" min="-8" max="16" value="9" step="0.5"><span class="v" id="r1aV">9</span></label>
+        </div>
+        <div class="case-banner" id="r1case"></div>
+        <div class="read">
+          <div class="it"><span class="l">Esiste in ℝ?</span><span class="v" id="r1ex">–</span></div>
+          <div class="it"><span class="l">Valore</span><span class="v m" id="r1val">–</span></div>
+          <div class="it"><span class="l">Interpretazione</span><span class="v" id="r1geo" style="font-weight:600;font-size:.82em">–</span></div>
+        </div>
+        <p class="hint">Con indice pari la curva vive solo per <span class="eqline">x ≥ 0</span>: la fascia
+           arancione segnala i radicandi non ammessi.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">Esercizi guidati</p>
+  <div class="card"><div class="guided" data-guided="g1"></div></div>
+
+  <p class="sec-label">Quiz</p>
+  <div class="card"><div class="quiz" data-quiz="q1"></div></div>
+</section>
+
+<!-- ============================================================ 2 · PROPRIETÀ ============================================================ -->
+<section class="scene" id="proprieta">
+  <div class="page-head">
+    <h2>Proprietà e semplificazione</h2>
+    <p class="lead">La proprietà invariantiva permette di cambiare indice senza cambiare valore: da qui la
+       semplificazione, la riduzione allo stesso indice e il confronto tra radicali.</p>
+  </div>
+
+  <p class="sec-label">Teoria</p>
+  <div class="card">
+    <div class="accordion">
+      <details open>
+        <summary>La proprietà invariantiva</summary>
+        <div class="acc-body">
+          <p>Moltiplicando (o dividendo) <strong>indice ed esponente del radicando per lo stesso numero</strong>
+             <span class="eqline">k</span>, il valore del radicale non cambia (con <span class="eqline">a ≥ 0</span>):</p>
+          <div class="formula center big"><span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>m</sup></span></span> = <span class="rad"><span class="ix">n·k</span>√<span class="rc">a<sup>m·k</sup></span></span></div>
+          <p>Il motivo è che entrambi valgono la stessa potenza a esponente frazionario:
+             <span class="eqline">a<sup>m/n</sup></span>. Moltiplicare sopra e sotto per
+             <span class="eqline">k</span> non cambia la frazione <span class="eqline">m/n</span>.</p>
+          <div class="formula center"><span class="rad">√<span class="rc">3</span></span> = <span class="rad"><span class="ix">4</span>√<span class="rc">3<sup>2</sup></span></span> = <span class="rad"><span class="ix">6</span>√<span class="rc">3<sup>3</sup></span></span> = <span class="rad"><span class="ix">4</span>√<span class="rc">9</span></span></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Semplificare un radicale</summary>
+        <div class="acc-body">
+          <p><strong>Semplificare</strong> significa applicare l'invariantiva al contrario: si
+             <strong>dividono</strong> indice ed esponente per un loro divisore comune, ottenendo un radicale
+             più semplice ma con lo stesso valore.</p>
+          <div class="formula center"><span class="rad"><span class="ix">6</span>√<span class="rc">a<sup>4</sup></span></span> = <span class="rad"><span class="ix">3</span>√<span class="rc">a<sup>2</sup></span></span> <span class="why">indice ed esponente divisi per 2</span></div>
+          <div class="note-warn">Quando dalla semplificazione un indice <strong>pari</strong> diventa
+            <strong>dispari</strong> e il radicando può essere negativo, occorre il valore assoluto:
+            <span class="eqline"><span class="rad"><span class="ix">4</span>√<span class="rc">a<sup>2</sup></span></span> = <span class="rad">√<span class="rc">|a|</span></span></span>.
+            Nel seguito, salvo avviso, supponiamo i radicandi non negativi.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Riduzione allo stesso indice</summary>
+        <div class="acc-body">
+          <p>Per confrontare o moltiplicare radicali con indici diversi conviene portarli
+             <strong>allo stesso indice</strong>, scelto come <strong>minimo comune multiplo</strong> (m.c.m.)
+             degli indici, usando la proprietà invariantiva.</p>
+          <div class="formula center"><span class="rad">√<span class="rc">a</span></span> , <span class="rad"><span class="ix">3</span>√<span class="rc">b</span></span> &nbsp;→&nbsp; indice 6 &nbsp;→&nbsp; <span class="rad"><span class="ix">6</span>√<span class="rc">a<sup>3</sup></span></span> , <span class="rad"><span class="ix">6</span>√<span class="rc">b<sup>2</sup></span></span></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Confronto tra radicali</summary>
+        <div class="acc-body">
+          <p>Ridotti allo stesso indice, tra due radicali è <strong>maggiore quello con il radicando
+             maggiore</strong>.</p>
+          <div class="formula center"><span class="rad">√<span class="rc">3</span></span> ? <span class="rad"><span class="ix">3</span>√<span class="rc">5</span></span> &nbsp;→&nbsp; <span class="rad"><span class="ix">6</span>√<span class="rc">27</span></span> ? <span class="rad"><span class="ix">6</span>√<span class="rc">25</span></span> &nbsp;→&nbsp; <span class="rad">√<span class="rc">3</span></span> &gt; <span class="rad"><span class="ix">3</span>√<span class="rc">5</span></span></div>
+          <div class="note-ok">27 &gt; 25, quindi <span class="eqline">√3 &gt; ∛5</span>. La simulazione qui sotto
+            fa esattamente questo confronto per i valori che scegli tu.</div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p class="sec-label">Simulazione · Stesso indice e confronto</p>
+  <div class="card">
+    <p>Scegli due radicali: la simulazione li riduce allo <strong>stesso indice</strong> (il m.c.m.) con la
+       proprietà invariantiva e li <strong>confronta</strong>.</p>
+    <div class="eq-display" id="r2eq"></div>
+    <div class="sim-layout">
+      <div class="ctrl-pane">
+        <div class="ctrl">
+          <label><span class="nm">radicando a</span><input type="range" id="r2a" min="2" max="30" value="3" step="1"><span class="v" id="r2aV">3</span></label>
+          <label><span class="nm">indice del 1º</span><input type="range" id="r2n" min="2" max="6" value="2" step="1"><span class="v" id="r2nV">2</span></label>
+          <label><span class="nm">radicando b</span><input type="range" id="r2b" min="2" max="30" value="5" step="1"><span class="v" id="r2bV">5</span></label>
+          <label><span class="nm">indice del 2º</span><input type="range" id="r2m" min="2" max="6" value="3" step="1"><span class="v" id="r2mV">3</span></label>
+        </div>
+      </div>
+      <div class="ctrl-pane">
+        <div class="read">
+          <div class="it"><span class="l">Indice comune</span><span class="v m" id="r2L">–</span></div>
+          <div class="it"><span class="l">1º ≈</span><span class="v m" id="r2v1">–</span></div>
+          <div class="it"><span class="l">2º ≈</span><span class="v m" id="r2v2">–</span></div>
+        </div>
+        <div class="derivation" id="r2steps"></div>
+        <div class="case-banner" id="r2case"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">Esercizi guidati</p>
+  <div class="card"><div class="guided" data-guided="g2"></div></div>
+
+  <p class="sec-label">Quiz</p>
+  <div class="card"><div class="quiz" data-quiz="q2"></div></div>
+</section>
+
+<!-- ============================================================ 3 · OPERAZIONI ============================================================ -->
+<section class="scene" id="operazioni">
+  <div class="page-head">
+    <h2>Operazioni con i radicali</h2>
+    <p class="lead">Prodotto e quoziente, trasporto dentro e fuori dal segno di radice, potenza e radice di un
+       radicale, somma di radicali simili.</p>
+  </div>
+
+  <p class="sec-label">Teoria</p>
+  <div class="card">
+    <div class="accordion">
+      <details open>
+        <summary>Prodotto e quoziente</summary>
+        <div class="acc-body">
+          <p>Con lo <strong>stesso indice</strong>, prodotto e quoziente si fanno sui radicandi:</p>
+          <div class="formula center big"><span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span> · <span class="rad"><span class="ix">n</span>√<span class="rc">b</span></span> = <span class="rad"><span class="ix">n</span>√<span class="rc">a·b</span></span> &nbsp;&nbsp;&nbsp; <span class="frac"><span class="nu"><span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span></span><span class="de"><span class="rad"><span class="ix">n</span>√<span class="rc">b</span></span></span></span> = <span class="rad"><span class="ix">n</span>√<span class="rc">a/b</span></span></div>
+          <p>Con indici diversi si <strong>riduce prima allo stesso indice</strong>. Esempio:
+             <span class="eqline">√3 · √12 = √36 = 6</span>.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Trasporto fuori dal segno di radice</summary>
+        <div class="acc-body">
+          <p>Se un fattore del radicando ha esponente <strong>maggiore o uguale all'indice</strong>, può
+             <strong>uscire</strong> dalla radice (con <span class="eqline">a ≥ 0</span>):</p>
+          <div class="formula center big"><span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>n</sup>·b</span></span> = a · <span class="rad"><span class="ix">n</span>√<span class="rc">b</span></span></div>
+          <p>In pratica si <strong>scompone il radicando</strong> cercando le potenze n-esime:</p>
+          <div class="formula center"><span class="rad">√<span class="rc">72</span></span> = <span class="rad">√<span class="rc">36·2</span></span> = 6<span class="rad">√<span class="rc">2</span></span> &nbsp;&nbsp;&nbsp; <span class="rad"><span class="ix">3</span>√<span class="rc">54</span></span> = <span class="rad"><span class="ix">3</span>√<span class="rc">27·2</span></span> = 3<span class="rad"><span class="ix">3</span>√<span class="rc">2</span></span></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Trasporto dentro il segno di radice</summary>
+        <div class="acc-body">
+          <p>L'operazione inversa: un fattore <span class="eqline">a ≥ 0</span> davanti alla radice
+             <strong>entra</strong> elevato all'indice.</p>
+          <div class="formula center big">a · <span class="rad"><span class="ix">n</span>√<span class="rc">b</span></span> = <span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>n</sup>·b</span></span></div>
+          <div class="formula center">2<span class="rad">√<span class="rc">3</span></span> = <span class="rad">√<span class="rc">2<sup>2</sup>·3</span></span> = <span class="rad">√<span class="rc">12</span></span></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Potenza e radice di un radicale</summary>
+        <div class="acc-body">
+          <p>Per elevare un radicale a potenza si eleva il radicando; per fare la radice di un radicale si
+             <strong>moltiplicano gli indici</strong>:</p>
+          <div class="formula center big">(<span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span>)<sup>p</sup> = <span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>p</sup></span></span> &nbsp;&nbsp;&nbsp; <span class="rad"><span class="ix">m</span>√<span class="rc"><span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span></span></span> = <span class="rad"><span class="ix">m·n</span>√<span class="rc">a</span></span></div>
+          <div class="formula center">(<span class="rad">√<span class="rc">2</span></span>)<sup>3</sup> = <span class="rad">√<span class="rc">8</span></span> = 2<span class="rad">√<span class="rc">2</span></span> &nbsp;&nbsp;&nbsp; <span class="rad"><span class="ix">3</span>√<span class="rc"><span class="rad">√<span class="rc">64</span></span></span></span> = <span class="rad"><span class="ix">6</span>√<span class="rc">64</span></span> = 2</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Somma algebrica: radicali simili</summary>
+        <div class="acc-body">
+          <p>Due radicali sono <strong>simili</strong> se, dopo la semplificazione, hanno <strong>stesso indice
+             e stesso radicando</strong>. Solo i radicali simili si possono sommare, raccogliendo la parte
+             radicale (come si fa con i monomi simili):</p>
+          <div class="formula center big">a<span class="rad">√<span class="rc">k</span></span> + b<span class="rad">√<span class="rc">k</span></span> = (a+b)<span class="rad">√<span class="rc">k</span></span></div>
+          <div class="formula center"><span class="rad">√<span class="rc">8</span></span> + <span class="rad">√<span class="rc">2</span></span> = 2<span class="rad">√<span class="rc">2</span></span> + <span class="rad">√<span class="rc">2</span></span> = 3<span class="rad">√<span class="rc">2</span></span></div>
+          <div class="note-err"><span class="eqline">√2 + √3</span> <strong>non</strong> si può semplificare: i
+            radicandi sono diversi, i radicali non sono simili.</div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p class="sec-label">Simulazione · Il laboratorio delle operazioni</p>
+  <div class="card">
+    <p>Scegli l'operazione e i valori: la simulazione mostra i <strong>passaggi</strong> e conferma il risultato
+       con il <strong>controllo numerico</strong>.</p>
+    <div class="selrow">
+      <div class="field"><label for="r3mode">Operazione</label>
+        <select id="r3mode">
+          <option value="mult">Prodotto o quoziente</option>
+          <option value="trasp">Trasporto fuori dalla radice</option>
+          <option value="somma">Somma di radicali (simili?)</option>
+        </select>
+      </div>
+    </div>
+    <div id="r3ctrls"></div>
+    <div class="eq-display" id="r3eq"></div>
+    <div class="derivation" id="r3steps"></div>
+    <div class="case-banner" id="r3case"></div>
+  </div>
+
+  <p class="sec-label">Esercizi guidati</p>
+  <div class="card"><div class="guided" data-guided="g3"></div></div>
+
+  <p class="sec-label">Quiz</p>
+  <div class="card"><div class="quiz" data-quiz="q3"></div></div>
+</section>
+
+<!-- ============================================================ 4 · RAZIONALIZZAZIONE ============================================================ -->
+<section class="scene" id="razionalizzazione">
+  <div class="page-head">
+    <h2>Razionalizzazione del denominatore</h2>
+    <p class="lead">Trasformare una frazione con radicali al denominatore in una equivalente senza radicali sotto
+       la linea, senza cambiarne il valore.</p>
+  </div>
+
+  <p class="sec-label">Teoria</p>
+  <div class="card">
+    <div class="accordion">
+      <details open>
+        <summary>Che cosa significa razionalizzare</summary>
+        <div class="acc-body">
+          <p><strong>Razionalizzare</strong> il denominatore vuol dire riscrivere la frazione in modo che al
+             denominatore <strong>non compaiano più radicali</strong>. Il trucco è sempre lo stesso:
+             <strong>moltiplicare numeratore e denominatore per uno stesso fattore</strong> (cioè per una
+             frazione che vale 1), scelto in modo da eliminare la radice sotto.</p>
+          <div class="note-key">Moltiplicare sopra e sotto per la stessa quantità non cambia il valore della
+            frazione: cambia solo la <em>forma</em>, rendendola più comoda per i calcoli e i confronti.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Denominatore con una sola radice</summary>
+        <div class="acc-body">
+          <p>Se al denominatore c'è <span class="eqline">√a</span>, si moltiplica sopra e sotto per
+             <span class="eqline">√a</span>:</p>
+          <div class="formula center big"><span class="frac"><span class="nu">k</span><span class="de"><span class="rad">√<span class="rc">a</span></span></span></span> = <span class="frac"><span class="nu">k·<span class="rad">√<span class="rc">a</span></span></span><span class="de"><span class="rad">√<span class="rc">a</span></span>·<span class="rad">√<span class="rc">a</span></span></span></span> = <span class="frac"><span class="nu">k<span class="rad">√<span class="rc">a</span></span></span><span class="de">a</span></span></div>
+          <p>Per una radice n-esima <span class="eqline"><span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>m</sup></span></span></span>
+             (con <span class="eqline">m &lt; n</span>) si moltiplica per
+             <span class="eqline"><span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>n−m</sup></span></span></span>, così sotto gli esponenti arrivano a n:</p>
+          <div class="formula center"><span class="frac"><span class="nu">1</span><span class="de"><span class="rad"><span class="ix">3</span>√<span class="rc">2</span></span></span></span> = <span class="frac"><span class="nu"><span class="rad"><span class="ix">3</span>√<span class="rc">2<sup>2</sup></span></span></span><span class="de"><span class="rad"><span class="ix">3</span>√<span class="rc">2<sup>3</sup></span></span></span></span> = <span class="frac"><span class="nu"><span class="rad"><span class="ix">3</span>√<span class="rc">4</span></span></span><span class="de">2</span></span></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Denominatore binomio: il coniugio</summary>
+        <div class="acc-body">
+          <p>Se al denominatore c'è una <strong>somma o differenza</strong> con radici quadrate, si moltiplica
+             per il <strong>coniugato</strong> (la stessa espressione col segno centrale cambiato), sfruttando
+             il prodotto notevole <span class="eqline">(x+y)(x−y) = x² − y²</span>:</p>
+          <div class="formula center big"><span class="frac"><span class="nu">k</span><span class="de"><span class="rad">√<span class="rc">a</span></span> + <span class="rad">√<span class="rc">b</span></span></span></span> = <span class="frac"><span class="nu">k(<span class="rad">√<span class="rc">a</span></span> − <span class="rad">√<span class="rc">b</span></span>)</span><span class="de">a − b</span></span></div>
+          <div class="formula center"><span class="frac"><span class="nu">1</span><span class="de"><span class="rad">√<span class="rc">3</span></span> − <span class="rad">√<span class="rc">2</span></span></span></span> = <span class="frac"><span class="nu"><span class="rad">√<span class="rc">3</span></span> + <span class="rad">√<span class="rc">2</span></span></span><span class="de">3 − 2</span></span> = <span class="rad">√<span class="rc">3</span></span> + <span class="rad">√<span class="rc">2</span></span></div>
+          <div class="note-ok">Il coniugato di <span class="eqline">p + √a</span> è <span class="eqline">p − √a</span>:
+            il prodotto dà <span class="eqline">p² − a</span>, senza radici.</div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p class="sec-label">Simulazione · Razionalizza passo per passo</p>
+  <div class="card">
+    <p>Scegli il tipo di denominatore e i valori: la simulazione mostra il fattore giusto, i passaggi e verifica
+       con i decimali che il <strong>valore non cambia</strong>.</p>
+    <div class="selrow">
+      <div class="field"><label for="r4mode">Tipo di denominatore</label>
+        <select id="r4mode">
+          <option value="mono">Una radice quadrata:  k / √a</option>
+          <option value="nth">Radice n-esima:  k / ⁿ√(aᵐ)</option>
+          <option value="conj">Binomio (coniugio):  k / (p + √a)</option>
+        </select>
+      </div>
+    </div>
+    <div id="r4ctrls"></div>
+    <div class="derivation" id="r4steps"></div>
+    <div class="read">
+      <div class="it"><span class="l">Valore di partenza</span><span class="v" id="r4v0">–</span></div>
+      <div class="it"><span class="l">Valore razionalizzato</span><span class="v" id="r4v1">–</span></div>
+    </div>
+    <div class="case-banner c2" id="r4case"></div>
+  </div>
+
+  <p class="sec-label">Esercizi guidati</p>
+  <div class="card"><div class="guided" data-guided="g4"></div></div>
+
+  <p class="sec-label">Quiz</p>
+  <div class="card"><div class="quiz" data-quiz="q4"></div></div>
+</section>
+
+<!-- ============================================================ 5 · ESPONENTI ============================================================ -->
+<section class="scene" id="esponenti">
+  <div class="page-head v">
+    <h2>Esponenti razionali ed espressioni irrazionali</h2>
+    <p class="lead">I radicali come potenze a esponente frazionario, le proprietà delle potenze estese ai
+       razionali e un primo sguardo alle equazioni irrazionali.</p>
+  </div>
+
+  <p class="sec-label">Teoria</p>
+  <div class="card">
+    <div class="accordion">
+      <details open>
+        <summary>Potenze a esponente razionale</summary>
+        <div class="acc-body">
+          <p>Per una base <span class="eqline">a &gt; 0</span> si definisce la potenza a esponente frazionario
+             proprio a partire dal radicale:</p>
+          <div class="formula center big violet">a<sup>m/n</sup> = <span class="rad"><span class="ix">n</span>√<span class="rc">a<sup>m</sup></span></span> = (<span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span>)<sup>m</sup></div>
+          <p>In particolare <span class="eqline">a<sup>1/n</sup> = <span class="rad"><span class="ix">n</span>√<span class="rc">a</span></span></span>
+             e, per l'esponente negativo, <span class="eqline">a<sup>−m/n</sup> = 1 / a<sup>m/n</sup></span>.</p>
+          <div class="formula center violet">8<sup>2/3</sup> = <span class="rad"><span class="ix">3</span>√<span class="rc">8<sup>2</sup></span></span> = <span class="rad"><span class="ix">3</span>√<span class="rc">64</span></span> = 4 = (<span class="rad"><span class="ix">3</span>√<span class="rc">8</span></span>)<sup>2</sup> = 2<sup>2</sup> = 4</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Le proprietà delle potenze (estese ai razionali)</summary>
+        <div class="acc-body">
+          <p>Con basi positive, le solite proprietà delle potenze valgono anche con esponenti frazionari:</p>
+          <div class="formula center">a<sup>p</sup>·a<sup>q</sup> = a<sup>p+q</sup> &nbsp;&nbsp; <span class="frac"><span class="nu">a<sup>p</sup></span><span class="de">a<sup>q</sup></span></span> = a<sup>p−q</sup> &nbsp;&nbsp; (a<sup>p</sup>)<sup>q</sup> = a<sup>p·q</sup> &nbsp;&nbsp; (a·b)<sup>p</sup> = a<sup>p</sup>·b<sup>p</sup></div>
+          <div class="note-key">Trasformare i radicali in potenze frazionarie è spesso la via più rapida per
+            semplificare espressioni complicate: si applicano le proprietà delle potenze e poi si torna al radicale.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Dai radicali alle potenze e viceversa</summary>
+        <div class="acc-body">
+          <p>Un esempio tipico: il prodotto di due radici della stessa base con indici diversi.</p>
+          <div class="formula center violet"><span class="rad">√<span class="rc">a</span></span>·<span class="rad"><span class="ix">3</span>√<span class="rc">a</span></span> = a<sup>1/2</sup>·a<sup>1/3</sup> = a<sup>1/2+1/3</sup> = a<sup>5/6</sup> = <span class="rad"><span class="ix">6</span>√<span class="rc">a<sup>5</sup></span></span></div>
+          <p>Senza le potenze frazionarie servirebbe la riduzione allo stesso indice; con le potenze basta
+             sommare gli esponenti <span class="eqline">1/2 + 1/3 = 5/6</span>.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Cenni sulle equazioni irrazionali</summary>
+        <div class="acc-body">
+          <p>Un'equazione è <strong>irrazionale</strong> quando l'incognita compare sotto radice. Per il caso
+             base <span class="eqline">√(f(x)) = g(x)</span> si procede così:</p>
+          <ol>
+            <li>si pongono le <strong>condizioni</strong>: <span class="eqline">f(x) ≥ 0</span> e
+                <span class="eqline">g(x) ≥ 0</span> (una radice quadrata non può essere negativa);</li>
+            <li>si <strong>elevano al quadrato</strong> i due membri: <span class="eqline">f(x) = g(x)²</span>;</li>
+            <li>si risolve e si <strong>verificano</strong> le soluzioni nelle condizioni.</li>
+          </ol>
+          <div class="formula center"><span class="rad">√<span class="rc">2x+1</span></span> = 3 &nbsp;→&nbsp; 2x+1 = 9 &nbsp;→&nbsp; x = 4 <span class="why">verifica: √(2·4+1)=√9=3 ✓</span></div>
+          <div class="note-err">Elevando al quadrato possono comparire soluzioni <strong>non accettabili</strong>:
+            la verifica finale non è facoltativa.</div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p class="sec-label">Simulazione · Potenze frazionarie ed equazioni</p>
+  <div class="card">
+    <div class="selrow">
+      <div class="field"><label for="r5mode">Cosa esplorare</label>
+        <select id="r5mode">
+          <option value="pot">Potenza a esponente razionale  aᵐⁿ</option>
+          <option value="eq">Equazione irrazionale  √x = c</option>
+        </select>
+      </div>
+    </div>
+    <div class="eq-display violet" id="r5eq"></div>
+    <div class="sim-layout">
+      <div class="sim-pane">
+        <canvas class="plot" id="r5Plot" width="640" height="420" aria-label="Grafico della potenza a esponente razionale"></canvas>
+        <div class="legend" id="r5leg"></div>
+      </div>
+      <div class="ctrl-pane">
+        <div id="r5ctrls"></div>
+        <div class="read" id="r5read"></div>
+        <div class="case-banner cv" id="r5case"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-label">Esercizi guidati</p>
+  <div class="card"><div class="guided" data-guided="g5"></div></div>
+
+  <p class="sec-label">Quiz</p>
+  <div class="card"><div class="quiz" data-quiz="q5"></div></div>
+</section>
+
+</main>
+
+<footer>
+  Radicali · app didattica interattiva · teoria, simulazioni, esercizi guidati e quiz.
+  Nessuna dipendenza esterna, funziona anche offline e da mobile · tema chiaro e scuro.
+</footer>
+
+<script>
+'use strict';
+/* ================================================================
+   Radicali · navigazione, matematica, simulazioni, esercizi, quiz
+   ================================================================ */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ri=n=>Math.floor(Math.random()*n);
+const PI=Math.PI;
+
+/* ---------------- Formattazione numerica ---------------- */
+function fmt(x,d=2){
+  if(x===Infinity)return'+∞';
+  if(x===-Infinity)return'−∞';
+  if(!isFinite(x)||Number.isNaN(x))return'non def.';
+  let r=Math.round(x*10**d)/10**d;
+  if(Object.is(r,-0))r=0;
+  let s=r.toFixed(d);
+  if(s.indexOf('.')>=0)s=s.replace(/0+$/,'').replace(/\.$/,'');
+  return s.replace('.',',').replace('-','−');
+}
+
+/* ---------------- Helper matematici (stringhe HTML) ---------------- */
+const FR=(a,b)=>'<span class="frac"><span class="nu">'+a+'</span><span class="de">'+b+'</span></span>';
+const SQ=r=>'<span class="rad">√<span class="rc">'+r+'</span></span>';
+const RAD=(i,r)=>(+i===2)?SQ(r):'<span class="rad"><span class="ix">'+i+'</span>√<span class="rc">'+r+'</span></span>';
+const POW=(b,e)=>(e===1||e==='1')?(''+b):(''+b+'<sup>'+e+'</sup>');
+
+/* ---------------- Aritmetica ---------------- */
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=b;b=a%b;a=t;}return a;};
+const lcm=(a,b)=>a/gcd(a,b)*b;
+function nroot(x,n){ if(x<0)return (n%2===1)? -Math.pow(-x,1/n):NaN; return Math.pow(x,1/n); }
+function factorize(N){const f={};let x=Math.abs(N);for(let p=2;p*p<=x;p++){while(x%p===0){f[p]=(f[p]||0)+1;x/=p;}}if(x>1)f[x]=(f[x]||0)+1;return f;}
+function extract(N,n){const f=factorize(N);let out=1,inr=1;for(const p in f){const e=f[p];out*=Math.pow(+p,Math.floor(e/n));inr*=Math.pow(+p,e%n);}return {out,inr};}
+function isPerfect(N,n){return extract(N,n).inr===1;}
+
+/* ---------------- Navigazione ---------------- */
+const navBtns=$$('#mainNav button');
+function show(id){
+  $$('.scene').forEach(s=>s.classList.toggle('active',s.id===id));
+  navBtns.forEach(b=>b.classList.toggle('active',b.dataset.target===id));
+  if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+  window.scrollTo(0,0);
+  requestAnimationFrame(redrawVisible);
+}
+navBtns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
+$$('.home-card').forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
+window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(document.getElementById(id))show(id);});
+
+/* ---------------- Motore quiz ---------------- */
+function shuffled(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function initQuiz(el){
+  const data=QUIZZES[el.dataset.quiz]; if(!data)return;
+  let i=0,score=0,order=null;
+  function qHTML(){
+    const q=data[i];
+    order=shuffled(q.opts.map((t,ix)=>({t,ix})));
+    el.innerHTML=
+      '<div class="quiz-hd"><span>Domanda '+(i+1)+' di '+data.length+'</span>'+
+      '<span class="score">Punteggio: '+score+'</span></div>'+
+      '<div class="quiz-bar"><i style="width:'+(i/data.length*100)+'%"></i></div>'+
+      '<p class="quiz-q">'+q.q+'</p>'+
+      '<div class="quiz-opts">'+order.map((o,k)=>'<button class="quiz-btn" data-k="'+k+'">'+o.t+'</button>').join('')+'</div>'+
+      '<div class="quiz-ft"></div>';
+    el.querySelectorAll('.quiz-btn').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.k)));
+  }
+  function answer(k){
+    const q=data[i],right=order[k].ix===q.ans;
+    if(right)score++;
+    el.querySelectorAll('.quiz-btn').forEach((b,j)=>{
+      b.disabled=true;
+      if(order[j].ix===q.ans)b.classList.add('correct');
+      else if(j===k)b.classList.add('wrong');
+    });
+    el.querySelector('.quiz-hd .score').textContent='Punteggio: '+score;
+    el.querySelector('.quiz-bar i').style.width=((i+1)/data.length*100)+'%';
+    const ft=el.querySelector('.quiz-ft');
+    ft.innerHTML='<div class="quiz-exp '+(right?'ok':'no')+'"><strong>'+(right?'Esatto. ':'Non è corretto. ')+'</strong>'+q.exp+'</div>'+
+      '<button class="btn btn-primary quiz-next">'+(i<data.length-1?'Avanti':'Vedi il risultato')+'</button>';
+    ft.querySelector('.quiz-next').addEventListener('click',()=>{i++;if(i<data.length)qHTML();else end();});
+  }
+  function end(){
+    const pct=score/data.length;
+    const msg=pct>=0.9?'Eccellente: padroneggi l’argomento.':
+      pct>=0.7?'Molto bene: ancora un piccolo sforzo per la perfezione.':
+      pct>=0.5?'Sufficiente: rileggi le spiegazioni degli errori e riprova.':
+      'Riparti dalla teoria e dalla simulazione, poi riprova il quiz.';
+    el.innerHTML='<div class="quiz-end"><div class="big">'+score+' / '+data.length+'</div><p>'+msg+'</p><button class="btn btn-primary">Ricomincia</button></div>';
+    el.querySelector('button').addEventListener('click',()=>{i=0;score=0;qHTML();});
+  }
+  qHTML();
+}
+
+/* ---------------- Motore esercizi guidati ---------------- */
+function initGuided(el){
+  const data=GUIDED[el.dataset.guided]; if(!data)return;
+  let i=0,shown=0;
+  function render(){
+    const ex=data[i], all=shown>=ex.passi.length;
+    let steps='';
+    for(let s=0;s<shown&&s<ex.passi.length;s++){
+      steps+='<li>'+(ex.passi[s].do?'<div class="gd-do">'+ex.passi[s].do+'</div>':'')+
+             (ex.passi[s].mo?'<div class="eqline">'+ex.passi[s].mo+'</div>':'')+'</li>';
+    }
+    el.innerHTML=
+      '<div class="quiz-hd"><span>Esercizio '+(i+1)+' di '+data.length+'</span>'+
+      '<span class="score">'+(all?'completato':'passo '+shown+' di '+ex.passi.length)+'</span></div>'+
+      '<div class="gd-text">'+ex.testo+'</div>'+
+      (steps?'<ol class="gd-steps">'+steps+'</ol>':'')+
+      (all?'<div class="sol-box"><span class="t">Soluzione</span>'+ex.sol+'</div>':'')+
+      '<div class="btn-row">'+
+        (all?'':'<button class="btn btn-primary" data-act="step">Mostra il passaggio successivo</button>')+
+        (shown>0?'<button class="btn btn-ghost" data-act="reset">Ricomincia</button>':'')+
+      '</div>'+
+      '<div class="btn-row">'+
+        '<button class="btn btn-ghost" data-act="prev"'+(i===0?' disabled':'')+'>‹ Precedente</button>'+
+        '<button class="btn btn-ghost" data-act="next"'+(i===data.length-1?' disabled':'')+'>Successivo ›</button>'+
+      '</div>';
+    el.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{
+      const a=b.dataset.act;
+      if(a==='step')shown++;
+      else if(a==='reset')shown=0;
+      else if(a==='prev'){i--;shown=0;}
+      else if(a==='next'){i++;shown=0;}
+      render();
+    }));
+  }
+  render();
+}
+
+/* ---------------- Grafici su canvas ---------------- */
+function niceStep(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const m=v/p;return(m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+class Plot{
+  constructor(c){this.c=c;this.g=c.getContext('2d');this.w=640;this.h=420;this.x1=-10;this.x2=10;this.y1=-10;this.y2=10;}
+  fit(){
+    const w=this.c.clientWidth||640;
+    const h=Math.max(250,Math.min(430,Math.round(w*0.66)));
+    const r=window.devicePixelRatio||1;
+    this.c.width=Math.round(w*r);this.c.height=Math.round(h*r);
+    this.c.style.height=h+'px';
+    this.g.setTransform(r,0,0,r,0,0);
+    this.w=w;this.h=h;
+  }
+  view(x1,x2,y1,y2){this.x1=x1;this.x2=x2;this.y1=y1;this.y2=y2;}
+  X(x){return(x-this.x1)/(this.x2-this.x1)*this.w;}
+  Y(y){return this.h-(y-this.y1)/(this.y2-this.y1)*this.h;}
+  ix(px){return this.x1+px/this.w*(this.x2-this.x1);}
+  axes(){
+    const g=this.g;
+    g.clearRect(0,0,this.w,this.h);
+    const sx=niceStep((this.x2-this.x1)/9),sy=niceStep((this.y2-this.y1)/7);
+    g.lineWidth=1;g.strokeStyle=CHART.grid;g.beginPath();
+    for(let x=Math.ceil(this.x1/sx)*sx;x<=this.x2+1e-9;x+=sx){const px=this.X(x);g.moveTo(px,0);g.lineTo(px,this.h);}
+    for(let y=Math.ceil(this.y1/sy)*sy;y<=this.y2+1e-9;y+=sy){const py=this.Y(y);g.moveTo(0,py);g.lineTo(this.w,py);}
+    g.stroke();
+    const y0=this.Y(0),x0=this.X(0);
+    g.strokeStyle=CHART.axis;g.lineWidth=1.4;g.beginPath();
+    if(y0>=0&&y0<=this.h){g.moveTo(0,y0);g.lineTo(this.w,y0);g.moveTo(this.w-8,y0-4);g.lineTo(this.w,y0);g.lineTo(this.w-8,y0+4);}
+    if(x0>=0&&x0<=this.w){g.moveTo(x0,this.h);g.lineTo(x0,0);g.moveTo(x0-4,8);g.lineTo(x0,0);g.lineTo(x0+4,8);}
+    g.stroke();
+    g.font='10.5px Inter,Roboto,system-ui,sans-serif';g.fillStyle=CHART.label;g.textAlign='center';
+    const ty=Math.min(Math.max(y0+13,12),this.h-4);
+    for(let x=Math.ceil(this.x1/sx)*sx;x<=this.x2+1e-9;x+=sx){if(Math.abs(x)<sx/2)continue;g.fillText(fmt(x,2),this.X(x),ty);}
+    g.textAlign='left';
+    const tx=Math.min(Math.max(x0+5,3),this.w-30);
+    for(let y=Math.ceil(this.y1/sy)*sy;y<=this.y2+1e-9;y+=sy){if(Math.abs(y)<sy/2)continue;g.fillText(fmt(y,2),tx,this.Y(y)-3);}
+  }
+  plotFn(f,color,width,dash){
+    const g=this.g;g.save();g.strokeStyle=color;g.lineWidth=width||2.6;g.lineJoin='round';if(dash)g.setLineDash(dash);
+    g.beginPath();let pen=false,prevpy=0;
+    for(let px=0;px<=this.w;px+=1.2){
+      const y=f(this.ix(px));
+      if(!isFinite(y)||Math.abs(y)>1e7){pen=false;continue;}
+      const py=this.Y(y);
+      if(py<-4000||py>4000){pen=false;prevpy=py;continue;}
+      if(pen&&Math.abs(py-prevpy)>this.h*1.3){pen=false;}
+      if(!pen){g.moveTo(px,py);pen=true;}else g.lineTo(px,py);
+      prevpy=py;
+    }
+    g.stroke();g.restore();
+  }
+  line(xa,ya,xb,yb,color,width,dash){
+    const g=this.g;g.save();g.strokeStyle=color;g.lineWidth=width||2;g.lineCap='round';if(dash)g.setLineDash(dash);
+    g.beginPath();g.moveTo(this.X(xa),this.Y(ya));g.lineTo(this.X(xb),this.Y(yb));g.stroke();g.restore();
+  }
+  dot(x,y,color,r){
+    const g=this.g;g.save();g.fillStyle=color;g.strokeStyle=CHART.halo;g.lineWidth=2;
+    g.beginPath();g.arc(this.X(x),this.Y(y),r||5,0,2*PI);g.fill();g.stroke();g.restore();
+  }
+  band(xa,xb,color){const g=this.g;g.save();g.fillStyle=color;const pa=this.X(xa),pb=this.X(xb);g.fillRect(Math.min(pa,pb),0,Math.abs(pb-pa),this.h);g.restore();}
+}
+const SIMS=[];
+function regSim(canvas,draw){SIMS.push({canvas,draw});}
+function redrawVisible(){SIMS.forEach(s=>{if(s.canvas.offsetParent!==null)s.draw();});}
+let rszT=null;
+window.addEventListener('resize',()=>{clearTimeout(rszT);rszT=setTimeout(redrawVisible,120);});
+const COLF='#2563eb',COLA='#f59e0b',COLV='#7c3aed',COLPOS='#1d70bf',COLNEG='#d97706';
+
+/* ---------------- Tema chiaro/scuro ---------------- */
+let CHART={bg:'#fff',grid:'#eef1f6',axis:'#9ca3af',label:'#9ca3af',halo:'#fff'};
+function readChart(){
+  const cs=getComputedStyle(document.documentElement),g=n=>cs.getPropertyValue(n).trim();
+  return{bg:g('--canvas-bg')||'#fff',grid:g('--chart-grid')||'#eef1f6',axis:g('--chart-axis')||'#9ca3af',label:g('--chart-label')||'#9ca3af',halo:g('--chart-halo')||'#fff'};
+}
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('radicali-theme',t);}catch(e){}
+  const m=document.querySelector('meta[name=theme-color]');
+  if(m)m.setAttribute('content',t==='dark'?'#0f172a':'#f9fafb');
+  CHART=readChart();redrawVisible();
+}
+(function(){
+  let t;try{t=localStorage.getItem('radicali-theme');}catch(e){}
+  if(!t)t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  const m=document.querySelector('meta[name=theme-color]');
+  if(m)m.setAttribute('content',t==='dark'?'#0f172a':'#f9fafb');
+  CHART=readChart();
+})();
+{const tb=document.getElementById('themeBtn');
+ if(tb)tb.addEventListener('click',()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));}
+
+/* ================================================================
+   SIMULAZIONE 1 · Radice n-esima
+   ================================================================ */
+(function(){
+  const nEl=$('#r1n'),aEl=$('#r1a'),nV=$('#r1nV'),aV=$('#r1aV');
+  const eq=$('#r1eq'),banner=$('#r1case'),ex=$('#r1ex'),val=$('#r1val'),geo=$('#r1geo');
+  const cv=$('#r1Plot'),P=new Plot(cv);
+  function draw(){
+    const n=+nEl.value,a=+aEl.value;
+    nV.textContent=n;aV.textContent=fmt(a,1);
+    eq.innerHTML='y = '+RAD(n,'x')+' &nbsp;·&nbsp; '+RAD(n,fmt(a,1));
+    const even=(n%2===0),exists=!(even&&a<0),v=nroot(a,n);
+    if(!exists){banner.className='case-banner c0';banner.innerHTML='Indice <strong>pari</strong> e radicando <strong>negativo</strong>: la radice non esiste nei numeri reali.';}
+    else{banner.className='case-banner c2';banner.innerHTML='La radice <strong>esiste</strong>'+(even?': indice pari, risultato non negativo.':': indice dispari, stesso segno del radicando.');}
+    ex.textContent=exists?'sì':'no';
+    val.innerHTML=exists?RAD(n,fmt(a,1))+' ≈ <strong>'+fmt(v,3)+'</strong>':'—';
+    geo.textContent=(n===2)?'lato del quadrato di area '+fmt(a,1):(n===3)?'spigolo del cubo di volume '+fmt(a,1):'—';
+    P.fit();
+    let x1,x2,y1,y2;
+    if(even){x1=-3;x2=Math.max(17,a+2);y1=-1;y2=Math.max(4.5,(isFinite(v)?v:0)+1.5);}
+    else{const mx=Math.max(9,Math.abs(a)+2);x1=-mx;x2=mx;const my=Math.max(2.5,(isFinite(v)?Math.abs(v):0)+1);y1=-my;y2=my;}
+    P.view(x1,x2,y1,y2);P.axes();
+    if(even)P.band(x1,0,'rgba(217,119,6,.12)');
+    P.plotFn(x=>nroot(x,n),COLF,2.7);
+    if(exists&&isFinite(v)){
+      P.line(a,y1,a,v,COLA,1.5,[4,4]);P.line(x1,v,a,v,COLA,1.5,[4,4]);
+      P.dot(a,v,COLA,5.5);
+    }
+  }
+  [nEl,aEl].forEach(e=>e.addEventListener('input',draw));
+  regSim(cv,draw);draw();
+})();
+
+/* ================================================================
+   SIMULAZIONE 2 · Riduzione allo stesso indice e confronto
+   ================================================================ */
+(function(){
+  const aEl=$('#r2a'),nEl=$('#r2n'),bEl=$('#r2b'),mEl=$('#r2m');
+  const aV=$('#r2aV'),nVv=$('#r2nV'),bV=$('#r2bV'),mV=$('#r2mV');
+  const eq=$('#r2eq'),L=$('#r2L'),v1=$('#r2v1'),v2=$('#r2v2'),steps=$('#r2steps'),cs=$('#r2case');
+  function upd(){
+    const a=+aEl.value,n=+nEl.value,b=+bEl.value,m=+mEl.value;
+    aV.textContent=a;nVv.textContent=n;bV.textContent=b;mV.textContent=m;
+    const Lc=lcm(n,m),e1=Lc/n,e2=Lc/m;
+    const RA=Math.pow(a,e1),RB=Math.pow(b,e2);
+    const val1=Math.pow(a,1/n),val2=Math.pow(b,1/m);
+    eq.innerHTML=RAD(n,a)+' &nbsp; e &nbsp; '+RAD(m,b);
+    L.textContent=Lc;v1.innerHTML=fmt(val1,3);v2.innerHTML=fmt(val2,3);
+    steps.innerHTML=
+      '<div><span class="op">riduco allo stesso indice (m.c.m. = '+Lc+')</span>'+
+      RAD(n,a)+' = '+RAD(Lc,POW(a,e1))+' = '+RAD(Lc,RA)+'</div>'+
+      '<div>'+RAD(m,b)+' = '+RAD(Lc,POW(b,e2))+' = '+RAD(Lc,RB)+'</div>';
+    let sym,txt;
+    if(Math.abs(RA-RB)<1e-9){sym='=';txt='I due radicali sono <strong>uguali</strong>.';}
+    else if(RA>RB){sym='>';txt='Il <strong>primo</strong> radicale è maggiore.';}
+    else{sym='<';txt='Il <strong>secondo</strong> radicale è maggiore.';}
+    cs.className='case-banner cn';
+    cs.innerHTML=RAD(n,a)+' '+sym+' '+RAD(m,b)+' &nbsp;— &nbsp;'+txt+' (radicandi a indice '+Lc+': '+RA+' e '+RB+')';
+  }
+  [aEl,nEl,bEl,mEl].forEach(e=>e.addEventListener('input',upd));
+  upd();
+})();
+
+/* ================================================================
+   SIMULAZIONE 3 · Operazioni
+   ================================================================ */
+(function(){
+  const mode=$('#r3mode'),ctrls=$('#r3ctrls'),eq=$('#r3eq'),steps=$('#r3steps'),cs=$('#r3case');
+  const C={
+    mult:'<div class="ctrl">'+
+      '<label><span class="nm">op.</span><select id="r3op" style="flex:1"><option value="x">prodotto ×</option><option value="d">quoziente ÷</option></select></label>'+
+      '<label><span class="nm">a</span><input type="range" id="r3a" min="2" max="20" value="3" step="1"><span class="v" id="r3av">3</span></label>'+
+      '<label><span class="nm">indice a</span><input type="range" id="r3na" min="2" max="4" value="2" step="1"><span class="v" id="r3nav">2</span></label>'+
+      '<label><span class="nm">b</span><input type="range" id="r3b" min="2" max="20" value="12" step="1"><span class="v" id="r3bv">12</span></label>'+
+      '<label><span class="nm">indice b</span><input type="range" id="r3nb" min="2" max="4" value="2" step="1"><span class="v" id="r3nbv">2</span></label></div>',
+    trasp:'<div class="ctrl">'+
+      '<label><span class="nm">radicando</span><input type="range" id="r3N" min="2" max="200" value="72" step="1"><span class="v" id="r3Nv">72</span></label>'+
+      '<label><span class="nm">indice</span><input type="range" id="r3ni" min="2" max="4" value="2" step="1"><span class="v" id="r3niv">2</span></label></div>',
+    somma:'<div class="ctrl">'+
+      '<label><span class="nm">c₁</span><input type="range" id="r3c1" min="1" max="9" value="1" step="1"><span class="v" id="r3c1v">1</span></label>'+
+      '<label><span class="nm">k₁</span><input type="range" id="r3k1" min="2" max="50" value="8" step="1"><span class="v" id="r3k1v">8</span></label>'+
+      '<label><span class="nm">c₂</span><input type="range" id="r3c2" min="1" max="9" value="1" step="1"><span class="v" id="r3c2v">1</span></label>'+
+      '<label><span class="nm">k₂</span><input type="range" id="r3k2" min="2" max="50" value="2" step="1"><span class="v" id="r3k2v">2</span></label></div>'
+  };
+  function multView(){
+    const a=+$('#r3a').value,na=+$('#r3na').value,b=+$('#r3b').value,nb=+$('#r3nb').value,op=$('#r3op').value;
+    $('#r3av').textContent=a;$('#r3nav').textContent=na;$('#r3bv').textContent=b;$('#r3nbv').textContent=nb;
+    const Lc=lcm(na,nb),ea=Lc/na,eb=Lc/nb;
+    const RA=Math.pow(a,ea),RB=Math.pow(b,eb);
+    const rad=(op==='x')?RA*RB:RA/RB;
+    eq.innerHTML=RAD(na,a)+(op==='x'?' · ':' : ')+RAD(nb,b);
+    let s='';
+    if(na!==nb)s+='<div><span class="op">stesso indice (m.c.m. = '+Lc+')</span>'+RAD(Lc,RA)+(op==='x'?' · ':' : ')+RAD(Lc,RB)+'</div>';
+    s+='<div><span class="op">'+(op==='x'?'moltiplico i radicandi':'divido i radicandi')+'</span>'+RAD(Lc,fmt(rad,4))+'</div>';
+    const ex=extract(Math.round(rad),Lc);
+    if(op==='x'&&Number.isInteger(rad)&&ex.out>1)s+='<div><span class="op">trasporto fuori</span>'+(ex.inr===1?ex.out:ex.out+RAD(Lc,ex.inr))+'</div>';
+    steps.innerHTML=s;
+    const num=(op==='x')?Math.pow(a,1/na)*Math.pow(b,1/nb):Math.pow(a,1/na)/Math.pow(b,1/nb);
+    cs.className='case-banner c2';
+    cs.innerHTML='Controllo numerico: '+fmt(Math.pow(a,1/na),3)+(op==='x'?' · ':' : ')+fmt(Math.pow(b,1/nb),3)+' ≈ <strong>'+fmt(num,3)+'</strong>, e '+RAD(Lc,fmt(rad,3))+' ≈ <strong>'+fmt(Math.pow(rad,1/Lc),3)+'</strong>.';
+  }
+  function traspView(){
+    const N=+$('#r3N').value,n=+$('#r3ni').value;
+    $('#r3Nv').textContent=N;$('#r3niv').textContent=n;
+    const {out,inr}=extract(N,n);
+    eq.innerHTML=RAD(n,N);
+    let s='<div><span class="op">scompongo il radicando</span>'+RAD(n,(out>1?POW(out,n)+' · ':'')+inr)+'</div>';
+    s+='<div><span class="op">porto fuori le potenze '+n+'-esime</span>'+(out>1?(out+RAD(n,inr)):RAD(n,inr))+(inr===1?' = '+out:'')+'</div>';
+    steps.innerHTML=s;
+    cs.className='case-banner c2';
+    const res=out*Math.pow(inr,1/n);
+    cs.innerHTML='Controllo numerico: '+RAD(n,N)+' ≈ <strong>'+fmt(Math.pow(N,1/n),3)+'</strong> = '+(out>1?out+'·':'')+RAD(n,inr)+' ≈ <strong>'+fmt(res,3)+'</strong>.'+(out===1?' Qui non esce nulla: il radicale è già ridotto.':'');
+  }
+  function sommaView(){
+    const c1=+$('#r3c1').value,k1=+$('#r3k1').value,c2=+$('#r3c2').value,k2=+$('#r3k2').value;
+    $('#r3c1v').textContent=c1;$('#r3k1v').textContent=k1;$('#r3c2v').textContent=c2;$('#r3k2v').textContent=k2;
+    const e1=extract(k1,2),e2=extract(k2,2);
+    const A=c1*e1.out,B=c2*e2.out;
+    eq.innerHTML=(c1===1?'':c1)+SQ(k1)+' + '+(c2===1?'':c2)+SQ(k2);
+    let s='<div><span class="op">semplifico ogni radicale</span>'+(c1===1?'':c1)+SQ(k1)+' = '+(A===1&&e1.inr!==1?'':A)+(e1.inr===1?'':SQ(e1.inr))+' &nbsp;+&nbsp; '+(c2===1?'':c2)+SQ(k2)+' = '+(B===1&&e2.inr!==1?'':B)+(e2.inr===1?'':SQ(e2.inr))+'</div>';
+    steps.innerHTML=s;
+    if(e1.inr===e2.inr){
+      const sum=A+B,r=e1.inr;
+      cs.className='case-banner c2';
+      const cA=(A===1?'':A),cB=(B===1?'':B);
+      cs.innerHTML='Radicali <strong>simili</strong> (stessa parte '+(r===1?'intera':SQ(r))+'): '+
+        (r===1? (A+' + '+B+' = <strong>'+sum+'</strong>') : (cA+SQ(r)+' + '+cB+SQ(r)+' = <strong>'+sum+SQ(r)+'</strong>'))+
+        '. &nbsp;Verifica: '+fmt(A*Math.sqrt(r),3)+' + '+fmt(B*Math.sqrt(r),3)+' ≈ '+fmt(sum*Math.sqrt(r),3)+'.';
+    }else{
+      cs.className='case-banner c1';
+      cs.innerHTML='Radicali <strong>non simili</strong>: le parti radicali ('+SQ(e1.inr)+' e '+SQ(e2.inr)+') sono diverse, la somma resta indicata.';
+    }
+  }
+  const draw={mult:multView,trasp:traspView,somma:sommaView};
+  function build(){
+    const md=mode.value;
+    ctrls.innerHTML=C[md];
+    ctrls.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',draw[md]));
+    draw[md]();
+  }
+  mode.addEventListener('change',build);
+  build();
+})();
+
+/* ================================================================
+   SIMULAZIONE 4 · Razionalizzazione
+   ================================================================ */
+(function(){
+  const mode=$('#r4mode'),ctrls=$('#r4ctrls'),steps=$('#r4steps'),v0=$('#r4v0'),v1=$('#r4v1'),cs=$('#r4case');
+  const C={
+    mono:'<div class="ctrl">'+
+      '<label><span class="nm">k (sopra)</span><input type="range" id="r4k" min="1" max="9" value="3" step="1"><span class="v" id="r4kv">3</span></label>'+
+      '<label><span class="nm">a (sotto √)</span><input type="range" id="r4a" min="2" max="15" value="5" step="1"><span class="v" id="r4av">5</span></label></div>',
+    nth:'<div class="ctrl">'+
+      '<label><span class="nm">k (sopra)</span><input type="range" id="r4k" min="1" max="9" value="1" step="1"><span class="v" id="r4kv">1</span></label>'+
+      '<label><span class="nm">a (base)</span><input type="range" id="r4a" min="2" max="9" value="2" step="1"><span class="v" id="r4av">2</span></label>'+
+      '<label><span class="nm">indice n</span><input type="range" id="r4n" min="3" max="5" value="3" step="1"><span class="v" id="r4nv">3</span></label>'+
+      '<label><span class="nm">esp. m</span><input type="range" id="r4m" min="1" max="4" value="1" step="1"><span class="v" id="r4mv">1</span></label></div>',
+    conj:'<div class="ctrl">'+
+      '<label><span class="nm">k (sopra)</span><input type="range" id="r4k" min="1" max="9" value="1" step="1"><span class="v" id="r4kv">1</span></label>'+
+      '<label><span class="nm">p (intero)</span><input type="range" id="r4p" min="1" max="9" value="3" step="1"><span class="v" id="r4pv">3</span></label>'+
+      '<label><span class="nm">a (sotto √)</span><input type="range" id="r4a" min="2" max="15" value="2" step="1"><span class="v" id="r4av">2</span></label></div>'
+  };
+  function monoView(){
+    const k=+$('#r4k').value,a=+$('#r4a').value,kc=(k===1?'':k);
+    $('#r4kv').textContent=k;$('#r4av').textContent=a;
+    steps.innerHTML=
+      '<div>'+FR(k,SQ(a))+'</div>'+
+      '<div><span class="op">moltiplico sopra e sotto per √a</span>'+FR((k===1?'':k+'·')+SQ(a),SQ(a)+'·'+SQ(a))+' = '+FR(kc+SQ(a),a)+'</div>';
+    const p0=k/Math.sqrt(a),p1=k*Math.sqrt(a)/a;
+    v0.textContent=fmt(p0,4);v1.textContent=fmt(p1,4);
+    cs.innerHTML='Stesso valore ('+fmt(p0,4)+'), ma ora il denominatore è il numero intero <strong>'+a+'</strong>.';
+  }
+  function nthView(){
+    let k=+$('#r4k').value,a=+$('#r4a').value,n=+$('#r4n').value,m=+$('#r4m').value;
+    if(m>=n){m=n-1;$('#r4m').value=m;}
+    $('#r4kv').textContent=k;$('#r4av').textContent=a;$('#r4nv').textContent=n;$('#r4mv').textContent=m;
+    const comp=n-m,kc=(k===1?'':k);
+    steps.innerHTML=
+      '<div>'+FR(k,RAD(n,POW(a,m)))+'</div>'+
+      '<div><span class="op">moltiplico per ⁿ√(a^(n−m)) sopra e sotto</span>'+FR((k===1?'':k+'·')+RAD(n,POW(a,comp)),RAD(n,POW(a,m))+'·'+RAD(n,POW(a,comp)))+'</div>'+
+      '<div><span class="op">sotto gli esponenti arrivano a n</span>'+FR(kc+RAD(n,POW(a,comp)),RAD(n,POW(a,n))+' = '+a)+' = '+FR(kc+RAD(n,Math.pow(a,comp)),a)+'</div>';
+    const p0=k/Math.pow(a,m/n),p1=k*Math.pow(a,comp/n)/a;
+    v0.textContent=fmt(p0,4);v1.textContent=fmt(p1,4);
+    cs.innerHTML='Stesso valore ('+fmt(p0,4)+'): il denominatore diventa l\'intero <strong>'+a+'</strong>.';
+  }
+  function conjView(){
+    const k=+$('#r4k').value,p=+$('#r4p').value,a=+$('#r4a').value,kc=(k===1?'':k);
+    $('#r4kv').textContent=k;$('#r4pv').textContent=p;$('#r4av').textContent=a;
+    const den=p*p-a;
+    steps.innerHTML=
+      '<div>'+FR(k,p+' + '+SQ(a))+'</div>'+
+      '<div><span class="op">moltiplico per il coniugato ('+p+' − √a)</span>'+FR(kc+'('+p+' − '+SQ(a)+')','('+p+' + '+SQ(a)+')('+p+' − '+SQ(a)+')')+'</div>'+
+      '<div><span class="op">(x+y)(x−y) = x² − y²</span>'+FR(kc+'('+p+' − '+SQ(a)+')',p+'² − '+a+' = '+den)+'</div>';
+    const p0=k/(p+Math.sqrt(a)),p1=k*(p-Math.sqrt(a))/den;
+    v0.textContent=fmt(p0,4);v1.textContent=fmt(p1,4);
+    cs.innerHTML='Stesso valore ('+fmt(p0,4)+'): il denominatore è ora l\'intero <strong>'+den+'</strong> = '+p+'² − '+a+'.';
+  }
+  const draw={mono:monoView,nth:nthView,conj:conjView};
+  function build(){
+    const md=mode.value;ctrls.innerHTML=C[md];
+    ctrls.querySelectorAll('input').forEach(e=>e.addEventListener('input',draw[md]));
+    draw[md]();
+  }
+  mode.addEventListener('change',build);build();
+})();
+
+/* ================================================================
+   SIMULAZIONE 5 · Esponente razionale / equazione irrazionale
+   ================================================================ */
+(function(){
+  const mode=$('#r5mode'),ctrls=$('#r5ctrls'),eq=$('#r5eq'),read=$('#r5read'),cs=$('#r5case'),leg=$('#r5leg');
+  const cv=$('#r5Plot'),P=new Plot(cv);
+  const C={
+    pot:'<div class="ctrl">'+
+      '<label><span class="nm">base a</span><input type="range" id="r5a" min="0.3" max="6" value="4" step="0.1"><span class="v" id="r5av">4</span></label>'+
+      '<label><span class="nm">m (sopra)</span><input type="range" id="r5m" min="1" max="6" value="1" step="1"><span class="v" id="r5mv">1</span></label>'+
+      '<label><span class="nm">n (indice)</span><input type="range" id="r5n" min="2" max="6" value="2" step="1"><span class="v" id="r5nv">2</span></label></div>',
+    eq:'<div class="ctrl">'+
+      '<label><span class="nm">c</span><input type="range" id="r5c" min="0" max="5" value="3" step="0.1"><span class="v" id="r5cv">3</span></label></div>'
+  };
+  function potView(){
+    const a=+$('#r5a').value,m=+$('#r5m').value,n=+$('#r5n').value;
+    $('#r5av').textContent=fmt(a,1);$('#r5mv').textContent=m;$('#r5nv').textContent=n;
+    const p=m/n,val=Math.pow(a,p);
+    eq.innerHTML=POW(fmt(a,1),m+'/'+n)+' = '+RAD(n,POW(fmt(a,1),m))+' = (' +RAD(n,fmt(a,1))+')'+(m===1?'':'<sup>'+m+'</sup>')+' ≈ '+fmt(val,3);
+    read.innerHTML=
+      '<div class="it"><span class="l">esponente m/n</span><span class="v m">'+m+'/'+n+' = '+fmt(p,3)+'</span></div>'+
+      '<div class="it"><span class="l">aᵐⁿ</span><span class="v m">'+fmt(val,4)+'</span></div>'+
+      '<div class="it"><span class="l">ⁿ√(aᵐ)</span><span class="v m">'+fmt(Math.pow(Math.pow(a,m),1/n),4)+'</span></div>';
+    cs.className='case-banner cv';
+    cs.innerHTML='Le tre forme danno lo <strong>stesso numero</strong>: potenza frazionaria, radice della potenza e potenza della radice coincidono.';
+    leg.innerHTML='<span><i style="background:#7c3aed"></i> y = x^('+m+'/'+n+')</span><span><i style="background:#f59e0b"></i> (a, a^('+m+'/'+n+'))</span>';
+    P.fit();const x2=Math.max(6,a+1),y2=Math.max(4,val+1);
+    P.view(-0.6,x2,-0.6,y2);P.axes();
+    P.band(-0.6,0,'rgba(217,119,6,.10)');
+    P.plotFn(x=>x<0?NaN:Math.pow(x,p),COLV,2.7);
+    P.line(a,-0.6,a,val,COLA,1.5,[4,4]);P.line(-0.6,val,a,val,COLA,1.5,[4,4]);P.dot(a,val,COLA,5.5);
+  }
+  function eqView(){
+    const c=+$('#r5c').value;$('#r5cv').textContent=fmt(c,1);
+    const x=c*c;
+    eq.innerHTML=SQ('x')+' = '+fmt(c,1)+' &nbsp;→&nbsp; x = '+fmt(c,1)+'² = <strong>'+fmt(x,2)+'</strong>';
+    read.innerHTML=
+      '<div class="it"><span class="l">condizione</span><span class="v" style="font-size:.82em">c ≥ 0</span></div>'+
+      '<div class="it"><span class="l">soluzione x</span><span class="v m">'+fmt(x,2)+'</span></div>'+
+      '<div class="it"><span class="l">verifica √x</span><span class="v m">'+fmt(Math.sqrt(x),2)+'</span></div>';
+    cs.className='case-banner '+(c>=0?'cv':'c0');
+    cs.innerHTML=c>=0?'√x = '+fmt(c,1)+' ammette la soluzione x = '+fmt(x,2)+' (l\'ascissa dove y=√x incontra la retta y='+fmt(c,1)+').':'Con c &lt; 0 non ci sarebbe soluzione: √x non è mai negativa.';
+    leg.innerHTML='<span><i style="background:#2563eb"></i> y = √x</span><span><i style="background:#f59e0b"></i> y = c</span><span><i style="background:#7c3aed"></i> soluzione</span>';
+    P.fit();const x2=Math.max(10,x+2),y2=Math.max(4,c+1);
+    P.view(-0.6,x2,-0.6,y2);P.axes();
+    P.plotFn(t=>t<0?NaN:Math.sqrt(t),COLF,2.7);
+    P.line(-0.6,c,x2,c,COLA,2,[6,4]);
+    if(c>=0){P.line(x,-0.6,x,c,COLV,1.5,[4,4]);P.dot(x,c,COLV,5.5);}
+  }
+  const draw={pot:potView,eq:eqView};
+  function build(){const md=mode.value;ctrls.innerHTML=C[md];ctrls.querySelectorAll('input').forEach(e=>e.addEventListener('input',draw[md]));draw[md]();}
+  mode.addEventListener('change',build);
+  regSim(cv,()=>draw[mode.value]());
+  build();
+})();
+
+/* ================================================================
+   ESERCIZI GUIDATI
+   ================================================================ */
+const GUIDED={
+  g1:[
+    {testo:'Calcola, se esiste in ℝ, il valore di '+RAD(3,'−125')+'.',
+     passi:[
+      {do:'Osserva l\'indice: 3 è dispari, quindi la radice esiste per ogni radicando.',mo:'indice 3 (dispari) → esiste anche con radicando negativo'},
+      {do:'Cerca il numero che elevato al cubo dà −125.',mo:'(−5)³ = −125'}],
+     sol:RAD(3,'−125')+' = −5, perché (−5)³ = −125.'},
+    {testo:'Semplifica '+SQ('(−7)<sup>2</sup>')+' usando la regola del valore assoluto.',
+     passi:[
+      {do:'Ricorda che √(a²) = |a|, non a.',mo:SQ('a<sup>2</sup>')+' = |a|'},
+      {do:'Applica con a = −7.',mo:SQ('(−7)<sup>2</sup>')+' = |−7|'}],
+     sol:SQ('(−7)<sup>2</sup>')+' = |−7| = 7.'},
+    {testo:'Per quali valori di x esiste in ℝ il radicale '+SQ('x − 3')+'?',
+     passi:[
+      {do:'L\'indice è pari (2): il radicando deve essere ≥ 0.',mo:'x − 3 ≥ 0'},
+      {do:'Risolvi la disequazione.',mo:'x ≥ 3'}],
+     sol:'Il radicale esiste per x ≥ 3.'}
+  ],
+  g2:[
+    {testo:'Semplifica il radicale '+RAD(6,'a<sup>4</sup>')+' (con a ≥ 0).',
+     passi:[
+      {do:'Cerca un divisore comune di indice ed esponente: qui MCD(6, 4) = 2.',mo:'6 = 2·3, 4 = 2·2'},
+      {do:'Dividi indice ed esponente per 2 (proprietà invariantiva).',mo:RAD(6,'a<sup>4</sup>')+' = '+RAD(3,'a<sup>2</sup>')}],
+     sol:RAD(6,'a<sup>4</sup>')+' = '+RAD(3,'a<sup>2</sup>')+'.'},
+    {testo:'Riduci allo stesso indice '+SQ('a')+' e '+RAD(3,'a')+'.',
+     passi:[
+      {do:'Trova il m.c.m. degli indici 2 e 3.',mo:'m.c.m.(2, 3) = 6'},
+      {do:'Porta ciascun radicale all\'indice 6 con l\'invariantiva.',mo:SQ('a')+' = '+RAD(6,'a<sup>3</sup>')+' , &nbsp; '+RAD(3,'a')+' = '+RAD(6,'a<sup>2</sup>')}],
+     sol:'Allo stesso indice: '+RAD(6,'a<sup>3</sup>')+' e '+RAD(6,'a<sup>2</sup>')+'.'},
+    {testo:'Stabilisci qual è maggiore tra '+RAD(3,'3')+' e '+SQ('2')+'.',
+     passi:[
+      {do:'Riduci allo stesso indice: m.c.m.(3, 2) = 6.',mo:RAD(3,'3')+' = '+RAD(6,'3<sup>2</sup>')+' = '+RAD(6,'9')+' , &nbsp; '+SQ('2')+' = '+RAD(6,'2<sup>3</sup>')+' = '+RAD(6,'8')},
+      {do:'Confronta i radicandi a parità di indice.',mo:'9 &gt; 8'}],
+     sol:RAD(3,'3')+' &gt; '+SQ('2')+', perché '+RAD(6,'9')+' &gt; '+RAD(6,'8')+'.'}
+  ],
+  g3:[
+    {testo:'Porta fuori dal segno di radice '+SQ('75')+'.',
+     passi:[
+      {do:'Scomponi 75 cercando un quadrato perfetto.',mo:'75 = 25 · 3 = 5² · 3'},
+      {do:'Fai uscire la radice del quadrato perfetto.',mo:SQ('75')+' = '+SQ('5<sup>2</sup> · 3')+' = 5'+SQ('3')}],
+     sol:SQ('75')+' = 5'+SQ('3')+'.'},
+    {testo:'Semplifica la somma '+SQ('50')+' + '+SQ('2')+'.',
+     passi:[
+      {do:'Riduci ogni radicale portando fuori i quadrati.',mo:SQ('50')+' = '+SQ('25·2')+' = 5'+SQ('2')},
+      {do:'Ora i due radicali hanno la stessa parte √2: sono simili.',mo:'5'+SQ('2')+' + '+SQ('2')+' = (5 + 1)'+SQ('2')}],
+     sol:SQ('50')+' + '+SQ('2')+' = 6'+SQ('2')+'.'},
+    {testo:'Calcola il prodotto '+SQ('6')+' · '+SQ('10')+' e semplifica.',
+     passi:[
+      {do:'Stesso indice: moltiplica i radicandi.',mo:SQ('6')+' · '+SQ('10')+' = '+SQ('60')},
+      {do:'Porta fuori i quadrati: 60 = 4 · 15.',mo:SQ('60')+' = '+SQ('4·15')+' = 2'+SQ('15')}],
+     sol:SQ('6')+' · '+SQ('10')+' = 2'+SQ('15')+'.'},
+    {testo:'Semplifica '+RAD(3,SQ('64'))+' (radice cubica di una radice quadrata).',
+     passi:[
+      {do:'Radice di radice: si moltiplicano gli indici.',mo:RAD(3,SQ('64'))+' = '+RAD(6,'64')},
+      {do:'Calcola: 64 = 2⁶.',mo:RAD(6,'64')+' = '+RAD(6,'2<sup>6</sup>')+' = 2'}],
+     sol:RAD(3,SQ('64'))+' = 2.'}
+  ],
+  g4:[
+    {testo:'Razionalizza '+FR('5',SQ('3'))+'.',
+     passi:[
+      {do:'Al denominatore c\'è √3: moltiplica sopra e sotto per √3.',mo:FR('5',SQ('3'))+' · '+FR(SQ('3'),SQ('3'))},
+      {do:'Sotto, √3·√3 = 3.',mo:FR('5'+SQ('3'),'3')}],
+     sol:FR('5',SQ('3'))+' = '+FR('5'+SQ('3'),'3')+'.'},
+    {testo:'Razionalizza '+FR('1',RAD(3,'4'))+'.',
+     passi:[
+      {do:'4 = 2², quindi il denominatore è ∛(2²): manca un fattore 2 per arrivare a 2³.',mo:FR('1',RAD(3,'2<sup>2</sup>'))},
+      {do:'Moltiplica sopra e sotto per ∛2.',mo:FR('1·'+RAD(3,'2'),RAD(3,'2<sup>2</sup>')+'·'+RAD(3,'2'))+' = '+FR(RAD(3,'2'),RAD(3,'2<sup>3</sup>'))+' = '+FR(RAD(3,'2'),'2')}],
+     sol:FR('1',RAD(3,'4'))+' = '+FR(RAD(3,'2'),'2')+'.'},
+    {testo:'Razionalizza '+FR('1',SQ('5')+' − '+SQ('2'))+' col coniugato.',
+     passi:[
+      {do:'Il coniugato di √5 − √2 è √5 + √2.',mo:'moltiplico sopra e sotto per '+SQ('5')+' + '+SQ('2')},
+      {do:'Al denominatore uso (x−y)(x+y) = x² − y².',mo:FR(SQ('5')+' + '+SQ('2'),'('+SQ('5')+')² − ('+SQ('2')+')² = 5 − 2 = 3')}],
+     sol:FR('1',SQ('5')+' − '+SQ('2'))+' = '+FR(SQ('5')+' + '+SQ('2'),'3')+'.'}
+  ],
+  g5:[
+    {testo:'Scrivi '+RAD(5,'a<sup>3</sup>')+' come potenza a esponente razionale (a &gt; 0).',
+     passi:[
+      {do:'La regola è ⁿ√(aᵐ) = a^(m/n).',mo:RAD(5,'a<sup>3</sup>')+' = a<sup>3/5</sup>'}],
+     sol:RAD(5,'a<sup>3</sup>')+' = a<sup>3/5</sup>.'},
+    {testo:'Calcola 27<sup>2/3</sup>.',
+     passi:[
+      {do:'Riscrivi come radice: a^(m/n) = ⁿ√(aᵐ).',mo:'27<sup>2/3</sup> = '+RAD(3,'27<sup>2</sup>')+' = (' +RAD(3,'27')+')<sup>2</sup>'},
+      {do:'Conviene fare prima la radice: ∛27 = 3.',mo:'(' +RAD(3,'27')+')<sup>2</sup> = 3<sup>2</sup>'}],
+     sol:'27<sup>2/3</sup> = 3² = 9.'},
+    {testo:'Semplifica '+SQ('a')+' · '+RAD(3,'a')+' con le potenze (a &gt; 0).',
+     passi:[
+      {do:'Trasforma i radicali in potenze.',mo:SQ('a')+' · '+RAD(3,'a')+' = a<sup>1/2</sup> · a<sup>1/3</sup>'},
+      {do:'Somma gli esponenti: 1/2 + 1/3 = 5/6.',mo:'a<sup>1/2 + 1/3</sup> = a<sup>5/6</sup>'},
+      {do:'Torna al radicale.',mo:'a<sup>5/6</sup> = '+RAD(6,'a<sup>5</sup>')}],
+     sol:SQ('a')+' · '+RAD(3,'a')+' = '+RAD(6,'a<sup>5</sup>')+'.'},
+    {testo:'Risolvi l\'equazione irrazionale '+SQ('x + 5')+' = 4.',
+     passi:[
+      {do:'Condizioni: x + 5 ≥ 0 e il secondo membro 4 ≥ 0 (ok).',mo:'x ≥ −5'},
+      {do:'Eleva al quadrato entrambi i membri.',mo:'x + 5 = 16'},
+      {do:'Risolvi e verifica.',mo:'x = 11 → '+SQ('11 + 5')+' = '+SQ('16')+' = 4 ✓'}],
+     sol:'x = 11 (accettabile: rispetta x ≥ −5 e la verifica).'}
+  ]
+};
+
+/* ================================================================
+   DATI QUIZ
+   ================================================================ */
+const QUIZZES={
+  q1:[
+    {q:'Nel simbolo '+RAD('n','a')+', come si chiama il numero a?',
+     opts:['Radicando','Indice','Esponente','Coefficiente'],ans:0,
+     exp:'a è il radicando; n è l\'indice della radice.'},
+    {q:'Quanto vale '+RAD(3,'−27')+'?',
+     opts:['−3','3','non esiste in ℝ','±3'],ans:0,
+     exp:'L\'indice 3 è dispari, quindi la radice esiste e ha lo stesso segno del radicando: (−3)³ = −27.'},
+    {q:'Quale di questi radicali NON esiste tra i numeri reali?',
+     opts:[SQ('−16'),RAD(3,'−16'),SQ('16'),RAD(5,'−1')],ans:0,
+     exp:'√(−16) ha indice pari e radicando negativo: non esiste in ℝ. Con indice dispari, invece, si può.'},
+    {q:'Quanto vale '+SQ('(−6)<sup>2</sup>')+'?',
+     opts:['6','−6','36','±6'],ans:0,
+     exp:'√(a²) = |a|, quindi √((−6)²) = |−6| = 6.'},
+    {q:'Per quali x esiste in ℝ il radicale '+SQ('x + 2')+'?',
+     opts:['x ≥ −2','x ≥ 2','x ≤ −2','ogni x reale'],ans:0,
+     exp:'Indice pari: serve radicando ≥ 0, cioè x + 2 ≥ 0 → x ≥ −2.'},
+    {q:'La radice quadrata √a di un numero a &gt; 0 è, per definizione…',
+     opts:['il valore non negativo che elevato al quadrato dà a','sempre ±','un numero negativo','il doppio di a'],ans:0,
+     exp:'La radice quadrata aritmetica indica solo il valore non negativo. Il ± compare quando si risolve x² = a.'},
+    {q:'Il lato di un quadrato di area 49 misura…',
+     opts:['7','24,5','9,8','non calcolabile'],ans:0,
+     exp:'Il lato è √49 = 7.'}
+  ],
+  q2:[
+    {q:'La proprietà invariantiva dice che, con a ≥ 0…',
+     opts:['si possono moltiplicare indice ed esponente per lo stesso numero','si può cambiare il radicando a piacere','la radice non cambia cambiando solo l\'indice','si somma lo stesso numero a indice ed esponente'],ans:0,
+     exp:'Moltiplicando (o dividendo) indice ed esponente per lo stesso k il valore resta uguale, perché è sempre a^(m/n).'},
+    {q:'Semplificando '+RAD(4,'a<sup>2</sup>')+' (a ≥ 0) si ottiene…',
+     opts:[SQ('a'),RAD(4,'a'),'a',SQ('a<sup>2</sup>')],ans:0,
+     exp:'Dividendo indice ed esponente per 2: ⁴√(a²) = √a.'},
+    {q:'Per ridurre '+SQ('a')+' e '+RAD(5,'a')+' allo stesso indice si usa l\'indice…',
+     opts:['10','7','5','2'],ans:0,
+     exp:'Si prende il m.c.m. degli indici: m.c.m.(2, 5) = 10.'},
+    {q:'Riducendo '+RAD(3,'a')+' all\'indice 6 si ottiene…',
+     opts:[RAD(6,'a<sup>2</sup>'),RAD(6,'a<sup>3</sup>'),RAD(6,'a'),SQ('a')],ans:0,
+     exp:'Si moltiplicano indice ed esponente per 2: ∛a = ∛(a¹) = ⁶√(a²).'},
+    {q:'Qual è il maggiore tra '+SQ('5')+' e '+RAD(3,'11')+'?',
+     opts:[SQ('5'),RAD(3,'11'),'sono uguali','non confrontabili'],ans:0,
+     exp:'Indice 6: √5 = ⁶√125 e ∛11 = ⁶√121. Poiché 125 &gt; 121, √5 &gt; ∛11.'},
+    {q:'Perché '+RAD(6,'a<sup>3</sup>')+' si può semplificare in '+SQ('a')+' (a ≥ 0)?',
+     opts:['perché MCD(6, 3) = 3 e si divide per 3','perché 6 − 3 = 3','perché 3 è dispari','non si può semplificare'],ans:0,
+     exp:'Dividendo indice ed esponente per 3: ⁶√(a³) = √a.'}
+  ],
+  q3:[
+    {q:'Quanto vale '+SQ('3')+' · '+SQ('12')+'?',
+     opts:['6','36',SQ('15'),'12'],ans:0,
+     exp:'Stesso indice: √3·√12 = √36 = 6.'},
+    {q:'Portando fuori dalla radice, '+SQ('72')+' vale…',
+     opts:['6'+SQ('2'),'2'+SQ('6'),'8'+SQ('3'),SQ('72')],ans:0,
+     exp:'72 = 36·2, quindi √72 = √(36·2) = 6√2.'},
+    {q:'Portando dentro la radice, 2'+SQ('3')+' diventa…',
+     opts:[SQ('12'),SQ('6'),SQ('18'),SQ('24')],ans:0,
+     exp:'2√3 = √(2²·3) = √12.'},
+    {q:'La somma '+SQ('8')+' + '+SQ('2')+' è uguale a…',
+     opts:['3'+SQ('2'),SQ('10'),'2'+SQ('2'),'non semplificabile'],ans:0,
+     exp:'√8 = 2√2, quindi 2√2 + √2 = 3√2.'},
+    {q:'Quale somma NON si può semplificare?',
+     opts:[SQ('2')+' + '+SQ('3'),SQ('8')+' + '+SQ('2'),SQ('12')+' + '+SQ('3'),'2'+SQ('5')+' + '+SQ('5')],ans:0,
+     exp:'√2 + √3 ha radicandi diversi (non riducibili a uno comune): i radicali non sono simili.'},
+    {q:'Quanto vale (' +SQ('2')+')<sup>3</sup>?',
+     opts:['2'+SQ('2'),SQ('8'),'8','2'],ans:0,
+     exp:'(√2)³ = √(2³) = √8 = 2√2 (entrambe le forme sono corrette; 2√2 è quella semplificata).'},
+    {q:'Quanto vale '+RAD(3,SQ('64'))+'?',
+     opts:['2','4','8','6'],ans:0,
+     exp:'Radice di radice: gli indici si moltiplicano, ∛(√64) = ⁶√64 = 2.'}
+  ],
+  q4:[
+    {q:'Razionalizzare il denominatore significa…',
+     opts:['riscrivere la frazione senza radicali al denominatore','eliminare il numeratore','arrotondare il risultato','cambiare il valore della frazione'],ans:0,
+     exp:'Si toglie il radicale dal denominatore moltiplicando sopra e sotto per un opportuno fattore, senza cambiare il valore.'},
+    {q:'Razionalizzando '+FR('3',SQ('5'))+' si ottiene…',
+     opts:[FR('3'+SQ('5'),'5'),FR(SQ('5'),'3'),FR('3','5'),'3'+SQ('5')],ans:0,
+     exp:'Si moltiplica sopra e sotto per √5: 3√5 / (√5·√5) = 3√5/5.'},
+    {q:'Per razionalizzare '+FR('1',RAD(3,'2'))+' si moltiplica sopra e sotto per…',
+     opts:[RAD(3,'2<sup>2</sup>'),SQ('2'),RAD(3,'2'),'2'],ans:0,
+     exp:'Serve arrivare a 2³ sotto: si moltiplica per ∛(2²) = ∛4, ottenendo ∛4/2.'},
+    {q:'Il coniugato di '+SQ('7')+' + '+SQ('3')+' è…',
+     opts:[SQ('7')+' − '+SQ('3'),SQ('7')+' + '+SQ('3'),'−'+SQ('7')+' − '+SQ('3'),SQ('3')+' − '+SQ('7')],ans:0,
+     exp:'Il coniugato cambia il segno centrale: √7 − √3. Il prodotto dà 7 − 3 = 4.'},
+    {q:'Razionalizzando '+FR('1',SQ('3')+' − '+SQ('2'))+' si ottiene…',
+     opts:[SQ('3')+' + '+SQ('2'),SQ('3')+' − '+SQ('2'),FR('1','1'),SQ('5')],ans:0,
+     exp:'Si moltiplica per il coniugato √3 + √2: al denominatore 3 − 2 = 1, quindi resta √3 + √2.'},
+    {q:'Nel coniugio si usa il prodotto notevole…',
+     opts:['(x + y)(x − y) = x² − y²','(x + y)² = x² + 2xy + y²','x² − y² = (x − y)²','(x + y)³'],ans:0,
+     exp:'Moltiplicare per il coniugato sfrutta (x + y)(x − y) = x² − y², che elimina le radici quadrate.'}
+  ],
+  q5:[
+    {q:'La scrittura a<sup>m/n</sup> (a &gt; 0) equivale a…',
+     opts:[RAD('n','a<sup>m</sup>'),RAD('m','a<sup>n</sup>'),'a·'+FR('m','n'),SQ('a<sup>mn</sup>')],ans:0,
+     exp:'Per definizione a^(m/n) = ⁿ√(aᵐ) = (ⁿ√a)ᵐ.'},
+    {q:'Quanto vale 8<sup>2/3</sup>?',
+     opts:['4','16',FR('16','3'),'6'],ans:0,
+     exp:'8^(2/3) = (∛8)² = 2² = 4.'},
+    {q:'Come potenza a esponente razionale, '+RAD(4,'a<sup>3</sup>')+' vale…',
+     opts:['a<sup>3/4</sup>','a<sup>4/3</sup>','a<sup>7</sup>','a<sup>12</sup>'],ans:0,
+     exp:'ⁿ√(aᵐ) = a^(m/n), quindi ⁴√(a³) = a^(3/4).'},
+    {q:'Usando le potenze, '+SQ('a')+' · '+RAD(3,'a')+' (a &gt; 0) vale…',
+     opts:[RAD(6,'a<sup>5</sup>'),RAD(5,'a<sup>6</sup>'),SQ('a'),'a'],ans:0,
+     exp:'a^(1/2)·a^(1/3) = a^(1/2 + 1/3) = a^(5/6) = ⁶√(a⁵).'},
+    {q:'Risolvendo '+SQ('x')+' = 5 (equazione irrazionale) si ottiene…',
+     opts:['x = 25','x = 5','x = ±5','nessuna soluzione'],ans:0,
+     exp:'Con la condizione 5 ≥ 0, si eleva al quadrato: x = 25 (e la verifica dà √25 = 5).'},
+    {q:'Perché in un\'equazione irrazionale bisogna sempre verificare le soluzioni?',
+     opts:['perché elevando al quadrato possono comparire soluzioni non accettabili','perché il quadrato è sempre negativo','perché la radice non esiste mai','non serve verificare'],ans:0,
+     exp:'L\'elevamento a quadrato può introdurre soluzioni «estranee» che non soddisfano l\'equazione o le condizioni: vanno controllate.'}
+  ]
+};
+
+/* ---------------- Avvio ---------------- */
+$$('.quiz').forEach(initQuiz);
+$$('.guided').forEach(initGuided);
+if(location.hash){const id=location.hash.slice(1);if(document.getElementById(id))show(id);}
+</script>
+</body>
+</html>
