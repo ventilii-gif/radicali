@@ -79,6 +79,12 @@ section.scene.active{display:block;animation:fadein .25s ease}
 .page-head h2{font-size:clamp(1.18rem,3.6vw,1.5rem);font-weight:800;letter-spacing:-.015em}
 .page-head .lead{margin-top:.15rem}
 .sec-label{font-size:.72em;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:1.5rem 0 .45rem}
+.sec-tabs{display:flex;gap:.35rem;margin:1.1rem 0 .85rem;flex-wrap:wrap}
+.sec-tab{flex:1;min-width:6rem;padding:.55rem .9rem;border:none;border-radius:8px;font-size:.88em;font-weight:600;cursor:pointer;font-family:inherit;transition:background .18s,color .18s;background:var(--border);color:var(--muted)}
+.sec-tab.active{background:var(--color-primary);color:#fff}
+.sec-tab:hover:not(.active){background:#d1d5db}
+:root[data-theme="dark"] .sec-tab:hover:not(.active){background:#374151}
+.sec-panel[hidden]{display:none}
 .lead{color:var(--muted);font-size:.92em}
 
 /* ===================== Card ===================== */
@@ -374,7 +380,13 @@ footer a{color:var(--color-secondary)}
        √(a²) non è sempre a.</p>
   </div>
 
-  <p class="sec-label">Teoria</p>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="esercizi" role="tab" aria-selected="false">Esercizi</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+  <div class="sec-panel" data-sectab="teoria">
   <div class="card">
     <div class="accordion">
       <details open>
@@ -455,7 +467,8 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Simulazione · La radice n-esima</p>
+  </div>
+  <div class="sec-panel" data-sectab="sim" hidden>
   <div class="card">
     <p>Scegli l'<strong>indice</strong> e il <strong>radicando</strong>: osserva il grafico di
        <span class="eqline">y = <span class="rad"><span class="ix">n</span>√<span class="rc">x</span></span></span>,
@@ -487,11 +500,14 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Esercizi guidati</p>
+  </div>
+  <div class="sec-panel" data-sectab="esercizi" hidden>
   <div class="card"><div class="guided" data-guided="g1"></div></div>
 
-  <p class="sec-label">Quiz</p>
+  </div>
+  <div class="sec-panel" data-sectab="quiz" hidden>
   <div class="card"><div class="quiz" data-quiz="q1"></div></div>
+  </div>
 </section>
 
 <!-- ============================================================ 2 · PROPRIETÀ ============================================================ -->
@@ -502,7 +518,13 @@ footer a{color:var(--color-secondary)}
        semplificazione, la riduzione allo stesso indice e il confronto tra radicali.</p>
   </div>
 
-  <p class="sec-label">Teoria</p>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="esercizi" role="tab" aria-selected="false">Esercizi</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+  <div class="sec-panel" data-sectab="teoria">
   <div class="card">
     <div class="accordion">
       <details open>
@@ -555,7 +577,8 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Simulazione · Stesso indice e confronto</p>
+  </div>
+  <div class="sec-panel" data-sectab="sim" hidden>
   <div class="card">
     <p>Scegli due radicali: la simulazione li riduce allo <strong>stesso indice</strong> (il m.c.m.) con la
        proprietà invariantiva e li <strong>confronta</strong>.</p>
@@ -581,11 +604,14 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Esercizi guidati</p>
+  </div>
+  <div class="sec-panel" data-sectab="esercizi" hidden>
   <div class="card"><div class="guided" data-guided="g2"></div></div>
 
-  <p class="sec-label">Quiz</p>
+  </div>
+  <div class="sec-panel" data-sectab="quiz" hidden>
   <div class="card"><div class="quiz" data-quiz="q2"></div></div>
+  </div>
 </section>
 
 <!-- ============================================================ 3 · OPERAZIONI ============================================================ -->
@@ -596,7 +622,13 @@ footer a{color:var(--color-secondary)}
        radicale, somma di radicali simili.</p>
   </div>
 
-  <p class="sec-label">Teoria</p>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="esercizi" role="tab" aria-selected="false">Esercizi</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+  <div class="sec-panel" data-sectab="teoria">
   <div class="card">
     <div class="accordion">
       <details open>
@@ -655,7 +687,8 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Simulazione · Il laboratorio delle operazioni</p>
+  </div>
+  <div class="sec-panel" data-sectab="sim" hidden>
   <div class="card">
     <p>Scegli l'operazione e i valori: la simulazione mostra i <strong>passaggi</strong> e conferma il risultato
        con il <strong>controllo numerico</strong>.</p>
@@ -674,11 +707,14 @@ footer a{color:var(--color-secondary)}
     <div class="case-banner" id="r3case"></div>
   </div>
 
-  <p class="sec-label">Esercizi guidati</p>
+  </div>
+  <div class="sec-panel" data-sectab="esercizi" hidden>
   <div class="card"><div class="guided" data-guided="g3"></div></div>
 
-  <p class="sec-label">Quiz</p>
+  </div>
+  <div class="sec-panel" data-sectab="quiz" hidden>
   <div class="card"><div class="quiz" data-quiz="q3"></div></div>
+  </div>
 </section>
 
 <!-- ============================================================ 4 · RAZIONALIZZAZIONE ============================================================ -->
@@ -689,7 +725,13 @@ footer a{color:var(--color-secondary)}
        la linea, senza cambiarne il valore.</p>
   </div>
 
-  <p class="sec-label">Teoria</p>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="esercizi" role="tab" aria-selected="false">Esercizi</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+  <div class="sec-panel" data-sectab="teoria">
   <div class="card">
     <div class="accordion">
       <details open>
@@ -732,7 +774,8 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Simulazione · Razionalizza passo per passo</p>
+  </div>
+  <div class="sec-panel" data-sectab="sim" hidden>
   <div class="card">
     <p>Scegli il tipo di denominatore e i valori: la simulazione mostra il fattore giusto, i passaggi e verifica
        con i decimali che il <strong>valore non cambia</strong>.</p>
@@ -754,11 +797,14 @@ footer a{color:var(--color-secondary)}
     <div class="case-banner c2" id="r4case"></div>
   </div>
 
-  <p class="sec-label">Esercizi guidati</p>
+  </div>
+  <div class="sec-panel" data-sectab="esercizi" hidden>
   <div class="card"><div class="guided" data-guided="g4"></div></div>
 
-  <p class="sec-label">Quiz</p>
+  </div>
+  <div class="sec-panel" data-sectab="quiz" hidden>
   <div class="card"><div class="quiz" data-quiz="q4"></div></div>
+  </div>
 </section>
 
 <!-- ============================================================ 5 · ESPONENTI ============================================================ -->
@@ -769,7 +815,13 @@ footer a{color:var(--color-secondary)}
        razionali e un primo sguardo alle equazioni irrazionali.</p>
   </div>
 
-  <p class="sec-label">Teoria</p>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="esercizi" role="tab" aria-selected="false">Esercizi</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+  <div class="sec-panel" data-sectab="teoria">
   <div class="card">
     <div class="accordion">
       <details open>
@@ -823,7 +875,8 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Simulazione · Potenze frazionarie ed equazioni</p>
+  </div>
+  <div class="sec-panel" data-sectab="sim" hidden>
   <div class="card">
     <div class="selrow">
       <div class="field"><label for="r5mode">Cosa esplorare</label>
@@ -847,11 +900,14 @@ footer a{color:var(--color-secondary)}
     </div>
   </div>
 
-  <p class="sec-label">Esercizi guidati</p>
+  </div>
+  <div class="sec-panel" data-sectab="esercizi" hidden>
   <div class="card"><div class="guided" data-guided="g5"></div></div>
 
-  <p class="sec-label">Quiz</p>
+  </div>
+  <div class="sec-panel" data-sectab="quiz" hidden>
   <div class="card"><div class="quiz" data-quiz="q5"></div></div>
+  </div>
 </section>
 
 </main>
@@ -908,6 +964,16 @@ function show(id){
 navBtns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
 $$('.home-card').forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
 window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(document.getElementById(id))show(id);});
+
+/* ---------------- Sotto-sezioni: Teoria / Simulazione / Esercizi / Quiz ---------------- */
+$$('.sec-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const sec=tab.closest('section');if(!sec)return;
+    sec.querySelectorAll('.sec-tab').forEach(t=>{t.classList.toggle('active',t===tab);t.setAttribute('aria-selected',t===tab);});
+    sec.querySelectorAll('.sec-panel').forEach(p=>{p.hidden=p.dataset.sectab!==tab.dataset.sectab;});
+    if(tab.dataset.sectab==='sim')requestAnimationFrame(()=>requestAnimationFrame(redrawVisible));
+  });
+});
 
 /* ---------------- Motore quiz ---------------- */
 function shuffled(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
