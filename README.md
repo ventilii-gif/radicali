@@ -3,8 +3,9 @@
 Web app didattica e interattiva sui **radicali**: dalle radici n-esime e le loro condizioni di
 esistenza fino alle potenze a esponente razionale e alle prime equazioni irrazionali.
 
-Tutto in un unico file (`index.html`): basta aprirlo nel browser, funziona anche offline e da
-mobile. Nessuna dipendenza esterna (solo i font, con fallback automatico), tema chiaro e scuro.
+La pagina (`index.html`) con la libreria **KaTeX** inclusa nel repo (cartella `katex/`) per la resa
+delle formule: basta aprirla nel browser, funziona anche offline e da mobile, senza dipendenze da
+CDN esterni. Tema chiaro e scuro.
 
 Riprende lo stile e l'impostazione delle app della stessa serie
 ([equazioni-disequazioni-sistemi](https://ventilii-gif.github.io/equazioni-disequazioni-sistemi/),
