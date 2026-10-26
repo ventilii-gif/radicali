@@ -1038,45 +1038,63 @@ $$('.sec-tab').forEach(tab=>{
 /* ---------------- Motore quiz ---------------- */
 function shuffled(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=ri(i+1);const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function initQuiz(el){
-  const data=QUIZZES[el.dataset.quiz]; if(!data)return;
-  let i=0,score=0,order=null;
-  function qHTML(){
-    const q=data[i];
-    order=shuffled(q.opts.map((t,ix)=>({t,ix})));
-    el.innerHTML=
-      '<div class="quiz-hd"><span>Domanda '+(i+1)+' di '+data.length+'</span>'+
-      '<span class="score">Punteggio: '+score+'</span></div>'+
-      '<div class="quiz-bar"><i style="width:'+(i/data.length*100)+'%"></i></div>'+
-      '<p class="quiz-q">'+q.q+'</p>'+
-      '<div class="quiz-opts">'+order.map((o,k)=>'<button class="quiz-btn" data-k="'+k+'">'+o.t+'</button>').join('')+'</div>'+
-      '<div class="quiz-ft"></div>';
-    el.querySelectorAll('.quiz-btn').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.k)));
+  const pool=QUIZZES[el.dataset.quiz]; if(!pool)return;
+  const N=Math.min(10,pool.length);
+  let qs,state,i;
+  function build(){
+    qs=shuffled(pool).slice(0,N).map(q=>({q,order:shuffled(q.opts.map((t,ix)=>({t,ix})))}));
+    state=qs.map(()=>({chosen:null}));
+    i=0;
   }
-  function answer(k){
-    const q=data[i],right=order[k].ix===q.ans;
-    if(right)score++;
-    el.querySelectorAll('.quiz-btn').forEach((b,j)=>{
-      b.disabled=true;
-      if(order[j].ix===q.ans)b.classList.add('correct');
-      else if(j===k)b.classList.add('wrong');
-    });
-    el.querySelector('.quiz-hd .score').textContent='Punteggio: '+score;
-    el.querySelector('.quiz-bar i').style.width=((i+1)/data.length*100)+'%';
-    const ft=el.querySelector('.quiz-ft');
-    ft.innerHTML='<div class="quiz-exp '+(right?'ok':'no')+'"><strong>'+(right?'Esatto. ':'Non è corretto. ')+'</strong>'+q.exp+'</div>'+
-      '<button class="btn btn-primary quiz-next">'+(i<data.length-1?'Avanti':'Vedi il risultato')+'</button>';
-    ft.querySelector('.quiz-next').addEventListener('click',()=>{i++;if(i<data.length)qHTML();else end();});
+  function score(){let s=0;qs.forEach((it,j)=>{const st=state[j];if(st.chosen!==null&&it.order[st.chosen].ix===it.q.ans)s++;});return s;}
+  function answeredCount(){let c=0;state.forEach(st=>{if(st.chosen!==null)c++;});return c;}
+  function render(){
+    const it=qs[i],Q=it.q,order=it.order,st=state[i],answered=st.chosen!==null;
+    const opts=order.map((o,k)=>{
+      let cls='quiz-btn',mk='';
+      if(answered){
+        if(o.ix===Q.ans){cls+=' correct';mk='<span class="mk">✓</span>';}
+        else if(k===st.chosen){cls+=' wrong';mk='<span class="mk">✕</span>';}
+      }
+      return '<button class="'+cls+'"'+(answered?' disabled':'')+' data-k="'+k+'">'+mk+o.t+'</button>';
+    }).join('');
+    const right=answered&&order[st.chosen].ix===Q.ans;
+    const ft=answered?'<div class="quiz-exp '+(right?'ok':'no')+'"><strong>'+(right?'Esatto. ':'Non è corretto. ')+'</strong>'+Q.exp+'</div>':'';
+    const lastAns=answered&&i===N-1;
+    el.innerHTML=
+      '<div class="quiz-hd"><span>Domanda '+(i+1)+' di '+N+'</span><span class="score">Punteggio: '+score()+'</span></div>'+
+      '<div class="quiz-bar"><i style="width:'+(answeredCount()/N*100)+'%"></i></div>'+
+      '<p class="quiz-q">'+Q.q+'</p>'+
+      '<div class="quiz-opts">'+opts+'</div>'+
+      '<div class="quiz-ft">'+ft+'</div>'+
+      '<div class="btn-row">'+
+        '<button class="btn btn-ghost" data-nav="prev"'+(i===0?' disabled':'')+'>‹ Precedente</button>'+
+        (lastAns
+          ? '<button class="btn btn-primary" data-nav="result">Vedi il risultato</button>'
+          : '<button class="btn btn-primary" data-nav="next"'+(answered?'':' disabled')+'>Successiva ›</button>')+
+      '</div>'+
+      (answered?'':'<p class="hint">Scegli una risposta per proseguire. Con «Precedente» puoi rivedere le domande già fatte, senza cambiarne la risposta.</p>');
+    el.querySelectorAll('.quiz-btn:not([disabled])').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.k)));
+    el.querySelectorAll('[data-nav]:not([disabled])').forEach(b=>b.addEventListener('click',()=>nav(b.dataset.nav)));
+  }
+  function pick(k){if(state[i].chosen!==null)return;state[i].chosen=k;render();}
+  function nav(d){
+    if(d==='prev'){if(i>0){i--;render();}}
+    else if(d==='next'){if(state[i].chosen!==null&&i<N-1){i++;render();}}
+    else if(d==='result'){end();}
   }
   function end(){
-    const pct=score/data.length;
+    const s=score(),pct=s/N;
     const msg=pct>=0.9?'Eccellente: padroneggi l’argomento.':
       pct>=0.7?'Molto bene: ancora un piccolo sforzo per la perfezione.':
       pct>=0.5?'Sufficiente: rileggi le spiegazioni degli errori e riprova.':
       'Riparti dalla teoria e dalla simulazione, poi riprova il quiz.';
-    el.innerHTML='<div class="quiz-end"><div class="big">'+score+' / '+data.length+'</div><p>'+msg+'</p><button class="btn btn-primary">Ricomincia</button></div>';
-    el.querySelector('button').addEventListener('click',()=>{i=0;score=0;qHTML();});
+    el.innerHTML='<div class="quiz-end"><div class="big">'+s+' / '+N+'</div><p>'+msg+'</p>'+
+      '<p style="color:var(--muted);font-size:.85em">Ogni tentativo propone 10 domande estratte a caso dal repertorio del capitolo.</p>'+
+      '<button class="btn btn-primary">Ricomincia</button></div>';
+    el.querySelector('button').addEventListener('click',()=>{build();render();});
   }
-  qHTML();
+  build();render();
 }
 
 /* ---------------- Motore esercizi guidati ---------------- */
@@ -1601,7 +1619,49 @@ const QUIZZES={
      exp:'La radice quadrata aritmetica indica solo il valore non negativo. Il doppio segno compare quando si risolve '+M('x^2 = a')+'.'},
     {q:'Il lato di un quadrato di area 49 misura…',
      opts:[M('7'),M('24,5'),M('9,8'),'non calcolabile'],ans:0,
-     exp:'Il lato è '+M(SQ('49')+' = 7')+'.'}
+     exp:'Il lato è '+M(SQ('49')+' = 7')+'.'},
+    {q:'Quanto vale '+M(SQ('64'))+'?',
+     opts:[M('8'),M('6'),M('32'),M('\\pm 8')],ans:0,
+     exp:M('8^2 = 64')+', e la radice quadrata aritmetica è il valore non negativo: '+M(SQ('64')+' = 8')+'.'},
+    {q:'Quanto vale '+M(RAD(3,'64'))+'?',
+     opts:[M('4'),M('8'),M('16'),M('3')],ans:0,
+     exp:M('4^3 = 64')+', quindi '+M(RAD(3,'64')+' = 4')+'.'},
+    {q:'Quanto vale '+M(RAD(4,'81'))+'?',
+     opts:[M('3'),M('9'),M('27'),M('\\pm 3')],ans:0,
+     exp:M('3^4 = 81')+' e l\'indice è pari: '+M(RAD(4,'81')+' = 3')+'.'},
+    {q:'Quale affermazione è corretta per un indice pari?',
+     opts:['la radice esiste solo se il radicando è ≥ 0','la radice esiste per ogni radicando','la radice è sempre negativa','l\'indice deve essere primo'],ans:0,
+     exp:'Con indice pari nessun numero reale elevato a quell\'esponente dà un radicando negativo.'},
+    {q:'Per un indice dispari, la radice n-esima…',
+     opts:['esiste per ogni radicando reale','esiste solo per radicando positivo','non esiste per radicandi negativi','vale sempre zero'],ans:0,
+     exp:'Con indice dispari la radice esiste per ogni reale e ha lo stesso segno del radicando.'},
+    {q:'Quanto vale '+M(SQ('(-9)^2'))+'?',
+     opts:[M('9'),M('-9'),M('81'),M('\\pm 9')],ans:0,
+     exp:M(SQ('a^2')+' = |a|')+', quindi '+M(SQ('(-9)^2')+' = |-9| = 9')+'.'},
+    {q:'L\'espressione '+M(SQ('a^2'))+' è uguale a…',
+     opts:[M('|a|'),M('a'),M('-a'),M('a^2')],ans:0,
+     exp:'La radice quadrata è non negativa: '+M(SQ('a^2')+' = |a|')+' per ogni '+M('a')+' reale.'},
+    {q:'Per un indice pari n, '+M(RAD('n','a^n'))+' vale…',
+     opts:[M('|a|'),M('a'),M('a^2'),M('n \\cdot a')],ans:0,
+     exp:'Con indice pari '+M(RAD('n','a^n')+' = |a|')+'; con indice dispari varrebbe '+M('a')+'.'},
+    {q:'Lo spigolo di un cubo di volume 27 misura…',
+     opts:[M('3'),M('9'),M('27'),M(SQ('27'))],ans:0,
+     exp:'Lo spigolo è '+M(RAD(3,'27')+' = 3')+', perché '+M('3^3 = 27')+'.'},
+    {q:'Il numero '+M(SQ('2'))+' è…',
+     opts:['irrazionale','intero','razionale non intero','non definito'],ans:0,
+     exp:M(SQ('2'))+' ha sviluppo decimale illimitato e non periodico: è irrazionale.'},
+    {q:'Quale di questi radicali esiste in ℝ?',
+     opts:[M(RAD(3,'-8')),M(SQ('-8')),M(RAD(4,'-1')),M(SQ('-100'))],ans:0,
+     exp:M(RAD(3,'-8')+' = -2')+' (indice dispari). Gli altri hanno indice pari e radicando negativo.'},
+    {q:'Nel radicale '+M(RAD(4,'7'))+' l\'indice è…',
+     opts:[M('4'),M('7'),M('2'),M('28')],ans:0,
+     exp:'L\'indice è 4 e il radicando è 7.'},
+    {q:'Risolvendo '+M('x^2 = 25')+' si ottiene…',
+     opts:[M('x = \\pm 5'),M('x = 5'),M('x = -5'),M('x = 25')],ans:0,
+     exp:'L\'equazione '+M('x^2 = 25')+' ha due soluzioni '+M('x = \\pm 5')+'; invece '+M(SQ('25')+' = 5')+' è solo il valore non negativo.'},
+    {q:'Per quali x esiste '+M(RAD(4,'x-1'))+'?',
+     opts:[M('x \\ge 1'),M('x > 1'),M('x \\ge -1'),'ogni x reale'],ans:0,
+     exp:'Indice pari: serve '+M('x-1 \\ge 0')+', cioè '+M('x \\ge 1')+'.'}
   ],
   q2:[
     {q:'La proprietà invariantiva dice che, con '+M('a \\ge 0')+'…',
@@ -1621,7 +1681,43 @@ const QUIZZES={
      exp:'Indice 6: '+M(SQ('5')+' = '+RAD(6,'125'))+' e '+M(RAD(3,'11')+' = '+RAD(6,'121'))+'. Poiché '+M('125 > 121')+', '+M(SQ('5')+' > '+RAD(3,'11'))+'.'},
     {q:'Perché '+M(RAD(6,'a^3'))+' si può semplificare in '+M(SQ('a'))+' (con '+M('a \\ge 0')+')?',
      opts:['perché MCD(6, 3) = 3 e si divide per 3','perché 6 − 3 = 3','perché 3 è dispari','non si può semplificare'],ans:0,
-     exp:'Dividendo indice ed esponente per 3: '+M(RAD(6,'a^3')+' = '+SQ('a'))+'.'}
+     exp:'Dividendo indice ed esponente per 3: '+M(RAD(6,'a^3')+' = '+SQ('a'))+'.'},
+    {q:'La proprietà invariantiva vale a condizione che…',
+     opts:['il radicando sia ≥ 0','l\'indice sia dispari','il radicando sia intero','l\'esponente sia pari'],ans:0,
+     exp:'Per i radicali aritmetici si richiede radicando non negativo.'},
+    {q:'Semplificando '+M(RAD(6,'a^2'))+' (con '+M('a \\ge 0')+') si ottiene…',
+     opts:[M(RAD(3,'a')),M(SQ('a')),M('a'),M(RAD(6,'a'))],ans:0,
+     exp:'Dividendo indice ed esponente per 2: '+M(RAD(6,'a^2')+' = '+RAD(3,'a'))+'.'},
+    {q:'Semplificando '+M(RAD(8,'a^4'))+' (con '+M('a \\ge 0')+') si ottiene…',
+     opts:[M(SQ('a')),M(RAD(4,'a')),M(RAD(8,'a^2')),M('a')],ans:0,
+     exp:'MCD(8, 4) = 4: '+M(RAD(8,'a^4')+' = '+SQ('a'))+'.'},
+    {q:'Per confrontare '+M(SQ('a'))+' e '+M(RAD(3,'a'))+' si riducono all\'indice…',
+     opts:[M('6'),M('5'),M('2'),M('9')],ans:0,
+     exp:'Si usa il m.c.m. degli indici: m.c.m.(2, 3) = 6.'},
+    {q:'Riducendo '+M(SQ('a'))+' all\'indice 6 si ottiene…',
+     opts:[M(RAD(6,'a^3')),M(RAD(6,'a^2')),M(RAD(6,'a')),M(RAD(3,'a'))],ans:0,
+     exp:M(SQ('a')+' = '+RAD(6,'a^3'))+': indice ed esponente moltiplicati per 3.'},
+    {q:'Qual è il maggiore tra '+M(SQ('2'))+' e '+M(RAD(3,'3'))+'?',
+     opts:[M(RAD(3,'3')),M(SQ('2')),'sono uguali','non confrontabili'],ans:0,
+     exp:'Indice 6: '+M(SQ('2')+' = '+RAD(6,'8'))+' e '+M(RAD(3,'3')+' = '+RAD(6,'9'))+'. Poiché '+M('9 > 8')+', '+M(RAD(3,'3')+' > '+SQ('2'))+'.'},
+    {q:'Riducendo '+M(RAD(4,'a'))+' all\'indice 12 si ottiene…',
+     opts:[M(RAD(12,'a^3')),M(RAD(12,'a^4')),M(RAD(12,'a^2')),M(RAD(12,'a'))],ans:0,
+     exp:'Indice ed esponente moltiplicati per 3: '+M(RAD(4,'a')+' = '+RAD(12,'a^3'))+'.'},
+    {q:'Semplificando '+M(RAD(9,'a^3'))+' (con '+M('a \\ge 0')+') si ottiene…',
+     opts:[M(RAD(3,'a')),M(SQ('a')),M(RAD(9,'a')),M('a')],ans:0,
+     exp:'MCD(9, 3) = 3: '+M(RAD(9,'a^3')+' = '+RAD(3,'a'))+'.'},
+    {q:'Perché si può scrivere '+M(SQ('5')+' = '+RAD(4,'25'))+'?',
+     opts:['per la proprietà invariantiva (×2 a indice ed esponente)','perché 5 = 25','perché le radici sono sempre uguali','non è vero'],ans:0,
+     exp:M(SQ('5')+' = '+RAD(4,'5^2')+' = '+RAD(4,'25'))+': indice ed esponente moltiplicati per 2.'},
+    {q:'Due radicali sono confrontabili direttamente quando hanno…',
+     opts:['lo stesso indice','lo stesso radicando','lo stesso valore','indici primi tra loro'],ans:0,
+     exp:'A parità di indice è maggiore quello col radicando maggiore; altrimenti si riducono allo stesso indice.'},
+    {q:'Semplifica '+M(RAD(10,'a^5'))+' (con '+M('a \\ge 0')+').',
+     opts:[M(SQ('a')),M(RAD(5,'a')),M(RAD(10,'a')),M(RAD(5,'a^2'))],ans:0,
+     exp:'MCD(10, 5) = 5: '+M(RAD(10,'a^5')+' = '+SQ('a'))+'.'},
+    {q:'Qual è il maggiore tra '+M(RAD(3,'4'))+' e '+M(SQ('2'))+'?',
+     opts:[M(RAD(3,'4')),M(SQ('2')),'sono uguali','non confrontabili'],ans:0,
+     exp:'Indice 6: '+M(RAD(3,'4')+' = '+RAD(6,'16'))+' e '+M(SQ('2')+' = '+RAD(6,'8'))+'. Poiché '+M('16 > 8')+', '+M(RAD(3,'4')+' > '+SQ('2'))+'.'}
   ],
   q3:[
     {q:'Quanto vale '+M(SQ('3')+' \\cdot '+SQ('12'))+'?',
@@ -1644,7 +1740,49 @@ const QUIZZES={
      exp:M('\\left('+SQ('2')+'\\right)^3 = '+SQ('2^3')+' = '+SQ('8')+' = 2'+SQ('2'))+' (la forma semplificata è '+M('2'+SQ('2'))+').'},
     {q:'Quanto vale '+M(RAD(3,SQ('64')))+'?',
      opts:[M('2'),M('4'),M('8'),M('6')],ans:0,
-     exp:'Radice di radice: gli indici si moltiplicano, '+M(RAD(3,SQ('64'))+' = '+RAD(6,'64')+' = 2')+'.'}
+     exp:'Radice di radice: gli indici si moltiplicano, '+M(RAD(3,SQ('64'))+' = '+RAD(6,'64')+' = 2')+'.'},
+    {q:'Quanto vale '+M(SQ('2')+' \\cdot '+SQ('8'))+'?',
+     opts:[M('4'),M('16'),M(SQ('10')),M('2'+SQ('2'))],ans:0,
+     exp:M(SQ('2')+' \\cdot '+SQ('8')+' = '+SQ('16')+' = 4')+'.'},
+    {q:'Quanto vale '+M(FR(SQ('18'),SQ('2')))+'?',
+     opts:[M('3'),M('9'),M(SQ('9')),M(SQ('16'))],ans:0,
+     exp:M(FR(SQ('18'),SQ('2'))+' = '+SQ('9')+' = 3')+'.'},
+    {q:'Portando fuori, '+M(SQ('50'))+' vale…',
+     opts:[M('5'+SQ('2')),M('2'+SQ('5')),M('5'+SQ('5')),M('25'+SQ('2'))],ans:0,
+     exp:M('50 = 25 \\cdot 2')+', quindi '+M(SQ('50')+' = 5'+SQ('2'))+'.'},
+    {q:'Portando fuori, '+M(RAD(3,'54'))+' vale…',
+     opts:[M('3'+RAD(3,'2')),M('2'+RAD(3,'3')),M('3'+RAD(3,'6')),M(RAD(3,'54'))],ans:0,
+     exp:M('54 = 27 \\cdot 2')+', quindi '+M(RAD(3,'54')+' = 3'+RAD(3,'2'))+'.'},
+    {q:'Portando dentro, '+M('3'+SQ('2'))+' diventa…',
+     opts:[M(SQ('18')),M(SQ('6')),M(SQ('12')),M(SQ('36'))],ans:0,
+     exp:M('3'+SQ('2')+' = '+SQ('3^2 \\cdot 2')+' = '+SQ('18'))+'.'},
+    {q:'Quanto vale '+M('\\left('+SQ('3')+'\\right)^2')+'?',
+     opts:[M('3'),M(SQ('3')),M('9'),M('6')],ans:0,
+     exp:M('\\left('+SQ('3')+'\\right)^2 = '+SQ('3^2')+' = 3')+'.'},
+    {q:'La somma '+M(SQ('12')+' + '+SQ('3'))+' vale…',
+     opts:[M('3'+SQ('3')),M(SQ('15')),M('2'+SQ('3')),M('4'+SQ('3'))],ans:0,
+     exp:M(SQ('12')+' = 2'+SQ('3'))+', quindi '+M('2'+SQ('3')+' + '+SQ('3')+' = 3'+SQ('3'))+'.'},
+    {q:'La differenza '+M(SQ('27')+' - '+SQ('12'))+' vale…',
+     opts:[M(SQ('3')),M(SQ('15')),M('5'+SQ('3')),M('0')],ans:0,
+     exp:M(SQ('27')+' = 3'+SQ('3'))+' e '+M(SQ('12')+' = 2'+SQ('3'))+', quindi '+M('3'+SQ('3')+' - 2'+SQ('3')+' = '+SQ('3'))+'.'},
+    {q:'Quanto vale '+M(RAD(4,SQ('a')))+' (con '+M('a \\ge 0')+')?',
+     opts:[M(RAD(8,'a')),M(RAD(6,'a')),M(SQ('a')),M(RAD(4,'a'))],ans:0,
+     exp:'Radice di radice: gli indici si moltiplicano, '+M(RAD(4,SQ('a'))+' = '+RAD(8,'a'))+'.'},
+    {q:'Quanto vale '+M(SQ('5')+' \\cdot '+SQ('5'))+'?',
+     opts:[M('5'),M(SQ('5')),M('25'),M('10')],ans:0,
+     exp:M(SQ('5')+' \\cdot '+SQ('5')+' = '+SQ('25')+' = 5')+'.'},
+    {q:'Quale somma si può semplificare?',
+     opts:[M(SQ('8')+' + '+SQ('18')),M(SQ('2')+' + '+SQ('5')),M(SQ('3')+' + '+SQ('7')),M(SQ('2')+' + '+SQ('3'))],ans:0,
+     exp:M(SQ('8')+' = 2'+SQ('2'))+' e '+M(SQ('18')+' = 3'+SQ('2'))+': simili, somma '+M('5'+SQ('2'))+'.'},
+    {q:'Quanto vale '+M('\\left(2'+SQ('3')+'\\right)^2')+'?',
+     opts:[M('12'),M('6'),M('2'+SQ('3')),M(SQ('12'))],ans:0,
+     exp:M('\\left(2'+SQ('3')+'\\right)^2 = 2^2 \\cdot 3 = 12')+'.'},
+    {q:'Quanto vale '+M(RAD(3,'2')+' \\cdot '+RAD(3,'4'))+'?',
+     opts:[M('2'),M(RAD(3,'8')),M(RAD(3,'6')),M('4')],ans:0,
+     exp:M(RAD(3,'2')+' \\cdot '+RAD(3,'4')+' = '+RAD(3,'8')+' = 2')+'.'},
+    {q:'Portando fuori, '+M(RAD(3,'16'))+' vale…',
+     opts:[M('2'+RAD(3,'2')),M('4'+RAD(3,'2')),M('2'+RAD(3,'4')),M(RAD(3,'16'))],ans:0,
+     exp:M('16 = 8 \\cdot 2')+', quindi '+M(RAD(3,'16')+' = 2'+RAD(3,'2'))+'.'}
   ],
   q4:[
     {q:'Razionalizzare il denominatore significa…',
@@ -1664,7 +1802,43 @@ const QUIZZES={
      exp:'Si moltiplica per il coniugato '+M(SQ('3')+' + '+SQ('2'))+': al denominatore '+M('3 - 2 = 1')+', quindi resta '+M(SQ('3')+' + '+SQ('2'))+'.'},
     {q:'Nel coniugio si usa il prodotto notevole…',
      opts:[M('(x+y)(x-y) = x^2 - y^2'),M('(x+y)^2 = x^2 + 2xy + y^2'),M('x^2 - y^2 = (x-y)^2'),M('(x+y)^3')],ans:0,
-     exp:'Moltiplicare per il coniugato sfrutta '+M('(x+y)(x-y) = x^2 - y^2')+', che elimina le radici quadrate.'}
+     exp:'Moltiplicare per il coniugato sfrutta '+M('(x+y)(x-y) = x^2 - y^2')+', che elimina le radici quadrate.'},
+    {q:'Razionalizzando '+M(FR('1',SQ('2')))+' si ottiene…',
+     opts:[M(FR(SQ('2'),'2')),M(FR('1',SQ('2'))),M(FR('2',SQ('2'))),M(SQ('2'))],ans:0,
+     exp:'Moltiplico per '+M(SQ('2'))+': '+M(FR('1',SQ('2'))+' = '+FR(SQ('2'),'2'))+'.'},
+    {q:'Razionalizzando '+M(FR('6',SQ('3')))+' si ottiene…',
+     opts:[M('2'+SQ('3')),M(FR('6',SQ('3'))),M(FR(SQ('3'),'2')),M('3'+SQ('2'))],ans:0,
+     exp:M(FR('6',SQ('3'))+' = '+FR('6'+SQ('3'),'3')+' = 2'+SQ('3'))+'.'},
+    {q:'Razionalizzando '+M(FR('1',RAD(3,'3')))+' si ottiene…',
+     opts:[M(FR(RAD(3,'9'),'3')),M(FR(RAD(3,'3'),'3')),M(RAD(3,'3')),M(FR('1','3'))],ans:0,
+     exp:'Moltiplico per '+M(RAD(3,'3^2')+' = '+RAD(3,'9'))+': '+M(FR('1',RAD(3,'3'))+' = '+FR(RAD(3,'9'),'3'))+'.'},
+    {q:'Il coniugato di '+M('2 + '+SQ('3'))+' è…',
+     opts:[M('2 - '+SQ('3')),M('2 + '+SQ('3')),M('-2 + '+SQ('3')),M(SQ('3')+' - 2')],ans:0,
+     exp:'Si cambia il segno centrale: '+M('2 - '+SQ('3'))+'. Prodotto: '+M('2^2 - 3 = 1')+'.'},
+    {q:'Razionalizzando '+M(FR('1','2 + '+SQ('3')))+' si ottiene…',
+     opts:[M('2 - '+SQ('3')),M('2 + '+SQ('3')),M(FR('1','1')),M(SQ('3')+' - 2')],ans:0,
+     exp:'Per il coniugato: denominatore '+M('2^2 - 3 = 1')+', quindi resta '+M('2 - '+SQ('3'))+'.'},
+    {q:'Per razionalizzare un denominatore '+M(SQ('a'))+' si moltiplica per…',
+     opts:[M(SQ('a')),M('a'),M(SQ('2a')),M(FR('1',SQ('a')))],ans:0,
+     exp:M(SQ('a')+' \\cdot '+SQ('a')+' = a')+': il radicale al denominatore sparisce.'},
+    {q:'Razionalizzando '+M(FR('1',RAD(3,'4')))+' si ottiene…',
+     opts:[M(FR(RAD(3,'2'),'2')),M(FR(RAD(3,'4'),'4')),M(RAD(3,'2')),M(FR('1','2'))],ans:0,
+     exp:M('4 = 2^2')+'; moltiplico per '+M(RAD(3,'2'))+': '+M(FR('1',RAD(3,'4'))+' = '+FR(RAD(3,'2'),'2'))+'.'},
+    {q:'Razionalizzando '+M(FR('1',SQ('7')+' + '+SQ('5')))+' si ottiene…',
+     opts:[M(FR(SQ('7')+' - '+SQ('5'),'2')),M(SQ('7')+' - '+SQ('5')),M(SQ('7')+' + '+SQ('5')),M(FR('1','2'))],ans:0,
+     exp:'Coniugato '+M(SQ('7')+' - '+SQ('5'))+': denominatore '+M('7 - 5 = 2')+', quindi '+M(FR(SQ('7')+' - '+SQ('5'),'2'))+'.'},
+    {q:'Moltiplicare numeratore e denominatore per la stessa quantità…',
+     opts:['non cambia il valore della frazione','raddoppia la frazione','cambia il segno','elimina il numeratore'],ans:0,
+     exp:'Equivale a moltiplicare per 1: il valore resta lo stesso, cambia solo la forma.'},
+    {q:'Il coniugato di '+M(SQ('5')+' - '+SQ('2'))+' è…',
+     opts:[M(SQ('5')+' + '+SQ('2')),M(SQ('5')+' - '+SQ('2')),M('-'+SQ('5')+' + '+SQ('2')),M(SQ('2')+' - '+SQ('5'))],ans:0,
+     exp:'Si cambia il segno centrale: '+M(SQ('5')+' + '+SQ('2'))+'.'},
+    {q:'Razionalizzando '+M(FR('10',SQ('5')))+' si ottiene…',
+     opts:[M('2'+SQ('5')),M(SQ('5')),M(FR('10',SQ('5'))),M('5'+SQ('2'))],ans:0,
+     exp:M(FR('10',SQ('5'))+' = '+FR('10'+SQ('5'),'5')+' = 2'+SQ('5'))+'.'},
+    {q:'Dopo la razionalizzazione, il valore decimale della frazione…',
+     opts:['resta lo stesso','aumenta','diminuisce','diventa intero'],ans:0,
+     exp:'La razionalizzazione cambia la forma, non il valore: il decimale è identico.'}
   ],
   q5:[
     {q:'La scrittura '+M(POW('a','m/n'))+' (con '+M('a>0')+') equivale a…',
@@ -1684,7 +1858,43 @@ const QUIZZES={
      exp:'Con la condizione '+M('5 \\ge 0')+' si eleva al quadrato: '+M('x = 25')+' (la verifica dà '+M(SQ('25')+' = 5')+').'},
     {q:'Perché in un\'equazione irrazionale bisogna sempre verificare le soluzioni?',
      opts:['perché elevando al quadrato possono comparire soluzioni non accettabili','perché il quadrato è sempre negativo','perché la radice non esiste mai','non serve verificare'],ans:0,
-     exp:'L\'elevamento al quadrato può introdurre soluzioni «estranee» che non soddisfano l\'equazione o le condizioni: vanno controllate.'}
+     exp:'L\'elevamento al quadrato può introdurre soluzioni «estranee» che non soddisfano l\'equazione o le condizioni: vanno controllate.'},
+    {q:'La scrittura '+M(POW('a','1/n'))+' (con '+M('a>0')+') equivale a…',
+     opts:[M(RAD('n','a')),M(RAD('n','a^n')),M('a \\cdot n'),M(POW('a','n'))],ans:0,
+     exp:M(POW('a','1/n')+' = '+RAD('n','a'))+'.'},
+    {q:'Quanto vale '+M(POW('9','1/2'))+'?',
+     opts:[M('3'),M('4,5'),M('81'),M('18')],ans:0,
+     exp:M(POW('9','1/2')+' = '+SQ('9')+' = 3')+'.'},
+    {q:'Quanto vale '+M(POW('27','1/3'))+'?',
+     opts:[M('3'),M('9'),M('27'),M('6')],ans:0,
+     exp:M(POW('27','1/3')+' = '+RAD(3,'27')+' = 3')+'.'},
+    {q:'Quanto vale '+M(POW('16','3/4'))+'?',
+     opts:[M('8'),M('12'),M('64'),M('4')],ans:0,
+     exp:M(POW('16','3/4')+' = \\left('+RAD(4,'16')+'\\right)^3 = 2^3 = 8')+'.'},
+    {q:'Quanto vale '+M(POW('4','-1/2'))+'?',
+     opts:[M(FR('1','2')),M('2'),M('-2'),M(FR('1','4'))],ans:0,
+     exp:M(POW('4','-1/2')+' = '+FR('1',POW('4','1/2'))+' = '+FR('1',SQ('4'))+' = '+FR('1','2'))+'.'},
+    {q:'Come potenza a esponente razionale, '+M(RAD(3,'a^2'))+' vale…',
+     opts:[M(POW('a','2/3')),M(POW('a','3/2')),M(POW('a','6')),M(POW('a','5'))],ans:0,
+     exp:M(RAD(3,'a^2')+' = '+POW('a','2/3'))+'.'},
+    {q:'Come radicale, '+M(POW('a','3/4'))+' vale…',
+     opts:[M(RAD(4,'a^3')),M(RAD(3,'a^4')),M(SQ('a^3')),M(RAD(4,'a'))],ans:0,
+     exp:M(POW('a','3/4')+' = '+RAD(4,'a^3'))+'.'},
+    {q:'Usando le potenze, '+M(RAD(3,'a')+' \\cdot '+RAD(6,'a'))+' (con '+M('a>0')+') vale…',
+     opts:[M(SQ('a')),M(RAD(6,'a')),M('a'),M(RAD(9,'a'))],ans:0,
+     exp:M(POW('a','1/3')+' \\cdot '+POW('a','1/6')+' = '+POW('a','1/3+1/6')+' = '+POW('a','1/2')+' = '+SQ('a'))+'.'},
+    {q:'Quanto vale '+M(POW('8','-1/3'))+'?',
+     opts:[M(FR('1','2')),M('2'),M('-2'),M('8')],ans:0,
+     exp:M(POW('8','-1/3')+' = '+FR('1',RAD(3,'8'))+' = '+FR('1','2'))+'.'},
+    {q:'Risolvendo '+M(SQ('x')+' = 7')+' si ottiene…',
+     opts:[M('x = 49'),M('x = 7'),M('x = \\pm 7'),'nessuna soluzione'],ans:0,
+     exp:'Con '+M('7 \\ge 0')+', elevando al quadrato: '+M('x = 49')+'.'},
+    {q:'L\'equazione '+M(SQ('x')+' = -2')+' ha…',
+     opts:['nessuna soluzione',M('x = 4'),M('x = -4'),M('x = \\pm 2')],ans:0,
+     exp:'Una radice quadrata non è mai negativa, quindi non c\'è soluzione.'},
+    {q:'Perché conviene scrivere i radicali come potenze?',
+     opts:['per applicare le proprietà delle potenze e semplificare','perché i radicali non esistono','per cambiare il valore','non conviene mai'],ans:0,
+     exp:'Con le potenze a esponente frazionario si usano le note proprietà, poi si torna al radicale.'}
   ]
 };
 
