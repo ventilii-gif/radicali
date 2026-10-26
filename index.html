@@ -1099,39 +1099,43 @@ function initQuiz(el){
 
 /* ---------------- Motore esercizi guidati ---------------- */
 function initGuided(el){
-  const data=GUIDED[el.dataset.guided]; if(!data)return;
-  let i=0,shown=0;
+  const pool=GUIDED[el.dataset.guided]; if(!pool)return;
+  const N=Math.min(5,pool.length);
+  let exs,i,shown;
+  function build(){exs=shuffled(pool).slice(0,N);i=0;shown=0;}
   function render(){
-    const ex=data[i], all=shown>=ex.passi.length;
+    const ex=exs[i], all=shown>=ex.passi.length;
     let steps='';
     for(let s=0;s<shown&&s<ex.passi.length;s++){
       steps+='<li>'+(ex.passi[s].do?'<div class="gd-do">'+ex.passi[s].do+'</div>':'')+
              (ex.passi[s].mo?'<div class="eqline">'+ex.passi[s].mo+'</div>':'')+'</li>';
     }
     el.innerHTML=
-      '<div class="quiz-hd"><span>Esercizio '+(i+1)+' di '+data.length+'</span>'+
+      '<div class="quiz-hd"><span>Esercizio '+(i+1)+' di '+N+'</span>'+
       '<span class="score">'+(all?'completato':'passo '+shown+' di '+ex.passi.length)+'</span></div>'+
       '<div class="gd-text">'+ex.testo+'</div>'+
       (steps?'<ol class="gd-steps">'+steps+'</ol>':'')+
       (all?'<div class="sol-box"><span class="t">Soluzione</span>'+ex.sol+'</div>':'')+
       '<div class="btn-row">'+
         (all?'':'<button class="btn btn-primary" data-act="step">Mostra il passaggio successivo</button>')+
-        (shown>0?'<button class="btn btn-ghost" data-act="reset">Ricomincia</button>':'')+
+        (shown>0?'<button class="btn btn-ghost" data-act="reset">Ricomincia esercizio</button>':'')+
       '</div>'+
       '<div class="btn-row">'+
         '<button class="btn btn-ghost" data-act="prev"'+(i===0?' disabled':'')+'>‹ Precedente</button>'+
-        '<button class="btn btn-ghost" data-act="next"'+(i===data.length-1?' disabled':'')+'>Successivo ›</button>'+
+        '<button class="btn btn-ghost" data-act="next"'+(i===N-1?' disabled':'')+'>Successivo ›</button>'+
+        '<button class="btn btn-ghost" data-act="new">↻ Nuovi esercizi</button>'+
       '</div>';
     el.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{
       const a=b.dataset.act;
       if(a==='step')shown++;
       else if(a==='reset')shown=0;
-      else if(a==='prev'){i--;shown=0;}
-      else if(a==='next'){i++;shown=0;}
+      else if(a==='prev'){if(i>0){i--;shown=0;}}
+      else if(a==='next'){if(i<N-1){i++;shown=0;}}
+      else if(a==='new'){build();}
       render();
     }));
   }
-  render();
+  build();render();
 }
 
 /* ---------------- Grafici su canvas ---------------- */
@@ -1511,7 +1515,34 @@ const GUIDED={
      passi:[
       {do:'L\'indice è pari (2): il radicando deve essere non negativo.',mo:M('x-3 \\ge 0')},
       {do:'Risolvi la disequazione.',mo:M('x \\ge 3')}],
-     sol:'Il radicale esiste per '+M('x \\ge 3')+'.'}
+     sol:'Il radicale esiste per '+M('x \\ge 3')+'.'},
+    {testo:'Calcola '+M(RAD(3,'-64'))+'.',
+     passi:[
+      {do:'L\'indice 3 è dispari: la radice esiste anche con radicando negativo.'},
+      {do:'Cerca il numero che elevato al cubo dà −64.',mo:M('(-4)^3 = -64')}],
+     sol:M(RAD(3,'-64')+' = -4')+'.'},
+    {testo:'Calcola '+M(RAD(4,'16'))+'.',
+     passi:[
+      {do:'Indice pari: cerca il valore non negativo che elevato alla quarta dà 16.',mo:M('2^4 = 16')}],
+     sol:M(RAD(4,'16')+' = 2')+'.'},
+    {testo:'Semplifica '+M(SQ('(-3)^2'))+'.',
+     passi:[
+      {do:'Usa la regola '+M(SQ('a^2')+' = |a|')+'.'},
+      {do:'Applica con a = −3.',mo:M(SQ('(-3)^2')+' = |-3| = 3')}],
+     sol:M(SQ('(-3)^2')+' = 3')+'.'},
+    {testo:'Per quali x esiste '+M(SQ('5-x'))+'?',
+     passi:[
+      {do:'Indice pari: il radicando deve essere non negativo.',mo:M('5-x \\ge 0')},
+      {do:'Risolvi la disequazione.',mo:M('x \\le 5')}],
+     sol:'Il radicale esiste per '+M('x \\le 5')+'.'},
+    {testo:'Stabilisci se '+M(SQ('-9'))+' esiste in ℝ.',
+     passi:[
+      {do:'Indice pari e radicando negativo: nessun reale al quadrato dà −9.'}],
+     sol:M(SQ('-9'))+' non esiste in ℝ.'},
+    {testo:'Calcola '+M(SQ('a^2'))+' per a = −10 e per a = 7.',
+     passi:[
+      {do:'La radice quadrata di un quadrato è il valore assoluto.',mo:M(SQ('a^2')+' = |a|')}],
+     sol:M('|-10| = 10')+' e '+M('|7| = 7')+'.'}
   ],
   g2:[
     {testo:'Semplifica il radicale '+M(RAD(6,'a^4'))+' (con '+M('a \\ge 0')+').',
@@ -1528,7 +1559,35 @@ const GUIDED={
      passi:[
       {do:'Riduci allo stesso indice: m.c.m.(3, 2) = 6.',mo:M(RAD(3,'3')+' = '+RAD(6,'3^2')+' = '+RAD(6,'9'))+' &nbsp; e &nbsp; '+M(SQ('2')+' = '+RAD(6,'2^3')+' = '+RAD(6,'8'))},
       {do:'Confronta i radicandi a parità di indice.',mo:M('9 > 8')}],
-     sol:M(RAD(3,'3')+' > '+SQ('2'))+', perché '+M(RAD(6,'9')+' > '+RAD(6,'8'))+'.'}
+     sol:M(RAD(3,'3')+' > '+SQ('2'))+', perché '+M(RAD(6,'9')+' > '+RAD(6,'8'))+'.'},
+    {testo:'Semplifica '+M(RAD(8,'a^6'))+' (con '+M('a \\ge 0')+').',
+     passi:[
+      {do:'Trova il divisore comune: MCD(8, 6) = 2.'},
+      {do:'Dividi indice ed esponente per 2.',mo:M(RAD(8,'a^6')+' = '+RAD(4,'a^3'))}],
+     sol:M(RAD(8,'a^6')+' = '+RAD(4,'a^3'))+'.'},
+    {testo:'Riduci allo stesso indice '+M(SQ('5'))+' e '+M(RAD(4,'7'))+'.',
+     passi:[
+      {do:'m.c.m. degli indici 2 e 4 è 4.'},
+      {do:'Porta il primo all\'indice 4 con l\'invariantiva.',mo:M(SQ('5')+' = '+RAD(4,'5^2')+' = '+RAD(4,'25'))}],
+     sol:'Allo stesso indice: '+M(RAD(4,'25'))+' e '+M(RAD(4,'7'))+'.'},
+    {testo:'Stabilisci qual è maggiore tra '+M(SQ('10'))+' e '+M(RAD(3,'30'))+'.',
+     passi:[
+      {do:'Riduci all\'indice m.c.m.(2, 3) = 6.',mo:M(SQ('10')+' = '+RAD(6,'1000'))+' , '+M(RAD(3,'30')+' = '+RAD(6,'900'))},
+      {do:'Confronta i radicandi.',mo:M('1000 > 900')}],
+     sol:M(SQ('10')+' > '+RAD(3,'30'))+'.'},
+    {testo:'Semplifica '+M(RAD(9,'a^6'))+' (con '+M('a \\ge 0')+').',
+     passi:[
+      {do:'MCD(9, 6) = 3: dividi indice ed esponente per 3.',mo:M(RAD(9,'a^6')+' = '+RAD(3,'a^2'))}],
+     sol:M(RAD(9,'a^6')+' = '+RAD(3,'a^2'))+'.'},
+    {testo:'Scrivi '+M(SQ('7'))+' con indice 6.',
+     passi:[
+      {do:'Moltiplica indice ed esponente per 3 (invariantiva).',mo:M(SQ('7')+' = '+RAD(6,'7^3')+' = '+RAD(6,'343'))}],
+     sol:M(SQ('7')+' = '+RAD(6,'343'))+'.'},
+    {testo:'Stabilisci qual è maggiore tra '+M(SQ('3'))+' e '+M(RAD(4,'10'))+'.',
+     passi:[
+      {do:'Riduci all\'indice 4.',mo:M(SQ('3')+' = '+RAD(4,'9'))+' , '+M(RAD(4,'10'))},
+      {do:'Confronta i radicandi.',mo:M('10 > 9')}],
+     sol:M(RAD(4,'10')+' > '+SQ('3'))+'.'}
   ],
   g3:[
     {testo:'Porta fuori dal segno di radice '+M(SQ('75'))+'.',
@@ -1550,7 +1609,43 @@ const GUIDED={
      passi:[
       {do:'Radice di radice: si moltiplicano gli indici.',mo:M(RAD(3,SQ('64'))+' = '+RAD(6,'64'))},
       {do:'Calcola: 64 = 2⁶.',mo:M(RAD(6,'64')+' = '+RAD(6,'2^6')+' = 2')}],
-     sol:M(RAD(3,SQ('64'))+' = 2')+'.'}
+     sol:M(RAD(3,SQ('64'))+' = 2')+'.'},
+    {testo:'Porta fuori dal segno di radice '+M(SQ('200'))+'.',
+     passi:[
+      {do:'Scomponi 200 cercando un quadrato perfetto.',mo:M('200 = 100 \\cdot 2')},
+      {do:'Fai uscire la radice del quadrato perfetto.',mo:M(SQ('200')+' = 10'+SQ('2'))}],
+     sol:M(SQ('200')+' = 10'+SQ('2'))+'.'},
+    {testo:'Semplifica '+M(SQ('48')+' - '+SQ('12'))+'.',
+     passi:[
+      {do:'Porta fuori i quadrati.',mo:M(SQ('48')+' = 4'+SQ('3'))+' , '+M(SQ('12')+' = 2'+SQ('3'))},
+      {do:'Sottrai i radicali simili.',mo:M('4'+SQ('3')+' - 2'+SQ('3')+' = 2'+SQ('3'))}],
+     sol:M(SQ('48')+' - '+SQ('12')+' = 2'+SQ('3'))+'.'},
+    {testo:'Calcola '+M(SQ('8')+' \\cdot '+SQ('2'))+'.',
+     passi:[
+      {do:'Stesso indice: moltiplica i radicandi.',mo:M(SQ('8')+' \\cdot '+SQ('2')+' = '+SQ('16')+' = 4')}],
+     sol:M(SQ('8')+' \\cdot '+SQ('2')+' = 4')+'.'},
+    {testo:'Porta dentro il segno di radice '+M('3'+SQ('5'))+'.',
+     passi:[
+      {do:'Il fattore entra elevato all\'indice (al quadrato).',mo:M('3'+SQ('5')+' = '+SQ('3^2 \\cdot 5')+' = '+SQ('45'))}],
+     sol:M('3'+SQ('5')+' = '+SQ('45'))+'.'},
+    {testo:'Semplifica '+M(SQ('18')+' + '+SQ('8')+' + '+SQ('2'))+'.',
+     passi:[
+      {do:'Porta fuori i quadrati.',mo:M(SQ('18')+' = 3'+SQ('2'))+' , '+M(SQ('8')+' = 2'+SQ('2'))},
+      {do:'Somma i radicali simili.',mo:M('3'+SQ('2')+' + 2'+SQ('2')+' + '+SQ('2')+' = 6'+SQ('2'))}],
+     sol:M(SQ('18')+' + '+SQ('8')+' + '+SQ('2')+' = 6'+SQ('2'))+'.'},
+    {testo:'Calcola '+M('\\left(2'+SQ('3')+'\\right)^2')+'.',
+     passi:[
+      {do:'Eleva coefficiente e radicale.',mo:M('\\left(2'+SQ('3')+'\\right)^2 = 2^2 \\cdot 3')}],
+     sol:M('\\left(2'+SQ('3')+'\\right)^2 = 12')+'.'},
+    {testo:'Porta fuori '+M(RAD(3,'24'))+'.',
+     passi:[
+      {do:'Scomponi cercando un cubo perfetto.',mo:M('24 = 8 \\cdot 3')},
+      {do:'Fai uscire la radice cubica del cubo.',mo:M(RAD(3,'24')+' = 2'+RAD(3,'3'))}],
+     sol:M(RAD(3,'24')+' = 2'+RAD(3,'3'))+'.'},
+    {testo:'Calcola '+M(SQ('12')+' \\cdot '+SQ('3'))+'.',
+     passi:[
+      {do:'Stesso indice: moltiplica i radicandi.',mo:M(SQ('12')+' \\cdot '+SQ('3')+' = '+SQ('36')+' = 6')}],
+     sol:M(SQ('12')+' \\cdot '+SQ('3')+' = 6')+'.'}
   ],
   g4:[
     {testo:'Razionalizza '+M(FR('5',SQ('3')))+'.',
@@ -1567,7 +1662,34 @@ const GUIDED={
      passi:[
       {do:'Il coniugato di '+M(SQ('5')+' - '+SQ('2'))+' è '+M(SQ('5')+' + '+SQ('2'))+': moltiplica sopra e sotto per esso.'},
       {do:'Al denominatore usa '+M('(x-y)(x+y) = x^2 - y^2')+'.',mo:M(FR(SQ('5')+' + '+SQ('2'),'('+SQ('5')+')^2 - ('+SQ('2')+')^2 = 5 - 2 = 3'))}],
-     sol:M(FR('1',SQ('5')+' - '+SQ('2'))+' = '+FR(SQ('5')+' + '+SQ('2'),'3'))+'.'}
+     sol:M(FR('1',SQ('5')+' - '+SQ('2'))+' = '+FR(SQ('5')+' + '+SQ('2'),'3'))+'.'},
+    {testo:'Razionalizza '+M(FR('1',SQ('7')))+'.',
+     passi:[
+      {do:'Moltiplica sopra e sotto per '+M(SQ('7'))+'.',mo:M(FR('1',SQ('7'))+' \\cdot '+FR(SQ('7'),SQ('7'))+' = '+FR(SQ('7'),'7'))}],
+     sol:M(FR('1',SQ('7'))+' = '+FR(SQ('7'),'7'))+'.'},
+    {testo:'Razionalizza '+M(FR('4',SQ('2')))+'.',
+     passi:[
+      {do:'Moltiplica sopra e sotto per '+M(SQ('2'))+'.',mo:M(FR('4'+SQ('2'),'2'))},
+      {do:'Semplifica la frazione.',mo:M(FR('4'+SQ('2'),'2')+' = 2'+SQ('2'))}],
+     sol:M(FR('4',SQ('2'))+' = 2'+SQ('2'))+'.'},
+    {testo:'Razionalizza '+M(FR('1',RAD(3,'9')))+'.',
+     passi:[
+      {do:'Poiché 9 = 3², moltiplica per '+M(RAD(3,'3'))+' per arrivare a '+M('3^3')+'.',mo:M(FR(RAD(3,'3'),RAD(3,'27'))+' = '+FR(RAD(3,'3'),'3'))}],
+     sol:M(FR('1',RAD(3,'9'))+' = '+FR(RAD(3,'3'),'3'))+'.'},
+    {testo:'Razionalizza '+M(FR('1','3 + '+SQ('2')))+'.',
+     passi:[
+      {do:'Moltiplica per il coniugato '+M('3 - '+SQ('2'))+'.'},
+      {do:'Al denominatore usa '+M('(x+y)(x-y) = x^2 - y^2')+'.',mo:M(FR('3 - '+SQ('2'),'3^2 - 2 = 7'))}],
+     sol:M(FR('1','3 + '+SQ('2'))+' = '+FR('3 - '+SQ('2'),'7'))+'.'},
+    {testo:'Razionalizza '+M(FR('2',SQ('5')+' + 1'))+'.',
+     passi:[
+      {do:'Coniugato '+M(SQ('5')+' - 1')+': denominatore '+M('5 - 1 = 4')+'.',mo:M(FR('2('+SQ('5')+' - 1)','4'))},
+      {do:'Semplifica.',mo:M(FR(SQ('5')+' - 1','2'))}],
+     sol:M(FR('2',SQ('5')+' + 1')+' = '+FR(SQ('5')+' - 1','2'))+'.'},
+    {testo:'Razionalizza '+M(FR('1',SQ('7')+' - '+SQ('3')))+'.',
+     passi:[
+      {do:'Coniugato '+M(SQ('7')+' + '+SQ('3'))+': denominatore '+M('7 - 3 = 4')+'.',mo:M(FR(SQ('7')+' + '+SQ('3'),'4'))}],
+     sol:M(FR('1',SQ('7')+' - '+SQ('3'))+' = '+FR(SQ('7')+' + '+SQ('3'),'4'))+'.'}
   ],
   g5:[
     {testo:'Scrivi '+M(RAD(5,'a^3'))+' come potenza a esponente razionale (con '+M('a>0')+').',
@@ -1590,7 +1712,45 @@ const GUIDED={
       {do:'Poni le condizioni (radicando e secondo membro non negativi).',mo:M('x+5 \\ge 0 \\;\\Rightarrow\\; x \\ge -5')},
       {do:'Eleva al quadrato entrambi i membri.',mo:M('x+5 = 16')},
       {do:'Risolvi e verifica la soluzione.',mo:M('x = 11 \\;\\Rightarrow\\; '+SQ('11+5')+' = '+SQ('16')+' = 4')+' ✓'}],
-     sol:M('x = 11')+' (accettabile: rispetta '+M('x \\ge -5')+' e supera la verifica).'}
+     sol:M('x = 11')+' (accettabile: rispetta '+M('x \\ge -5')+' e supera la verifica).'},
+    {testo:'Scrivi '+M(RAD(3,'a^2'))+' come potenza a esponente razionale (con '+M('a>0')+').',
+     passi:[
+      {do:'La regola è '+M(RAD('n','a^m')+' = '+POW('a','m/n'))+'.',mo:M(RAD(3,'a^2')+' = '+POW('a','2/3'))}],
+     sol:M(RAD(3,'a^2')+' = '+POW('a','2/3'))+'.'},
+    {testo:'Calcola '+M(POW('16','3/4'))+'.',
+     passi:[
+      {do:'Riscrivi come potenza della radice.',mo:M(POW('16','3/4')+' = \\left('+RAD(4,'16')+'\\right)^3')},
+      {do:'Fai prima la radice.',mo:M('\\left('+RAD(4,'16')+'\\right)^3 = 2^3 = 8')}],
+     sol:M(POW('16','3/4')+' = 8')+'.'},
+    {testo:'Calcola '+M(POW('8','2/3'))+'.',
+     passi:[
+      {do:'Conviene fare prima la radice cubica.',mo:M(POW('8','2/3')+' = \\left('+RAD(3,'8')+'\\right)^2 = 2^2')}],
+     sol:M(POW('8','2/3')+' = 4')+'.'},
+    {testo:'Scrivi '+M(POW('a','5/6'))+' come radicale (con '+M('a>0')+').',
+     passi:[
+      {do:'Usa '+M(POW('a','m/n')+' = '+RAD('n','a^m'))+'.',mo:M(POW('a','5/6')+' = '+RAD(6,'a^5'))}],
+     sol:M(POW('a','5/6')+' = '+RAD(6,'a^5'))+'.'},
+    {testo:'Semplifica '+M(RAD(3,'a')+' \\cdot '+RAD(6,'a'))+' con le potenze (con '+M('a>0')+').',
+     passi:[
+      {do:'Trasforma in potenze e somma gli esponenti.',mo:M(POW('a','1/3')+' \\cdot '+POW('a','1/6')+' = '+POW('a','1/2'))},
+      {do:'Torna al radicale.',mo:M(POW('a','1/2')+' = '+SQ('a'))}],
+     sol:M(RAD(3,'a')+' \\cdot '+RAD(6,'a')+' = '+SQ('a'))+'.'},
+    {testo:'Calcola '+M(POW('4','-1/2'))+'.',
+     passi:[
+      {do:'Esponente negativo: passa al reciproco.',mo:M(POW('4','-1/2')+' = '+FR('1',POW('4','1/2'))+' = '+FR('1',SQ('4')))}],
+     sol:M(POW('4','-1/2')+' = '+FR('1','2'))+'.'},
+    {testo:'Risolvi l\'equazione irrazionale '+M(SQ('x-1')+' = 3')+'.',
+     passi:[
+      {do:'Condizioni: '+M('x-1 \\ge 0')+' e secondo membro '+M('\\ge 0')+'.'},
+      {do:'Eleva al quadrato e risolvi.',mo:M('x-1 = 9 \\;\\Rightarrow\\; x = 10')},
+      {do:'Verifica.',mo:M(SQ('10-1')+' = '+SQ('9')+' = 3')+' ✓'}],
+     sol:M('x = 10')+'.'},
+    {testo:'Risolvi l\'equazione irrazionale '+M(SQ('2x')+' = 4')+'.',
+     passi:[
+      {do:'Condizione: secondo membro '+M('\\ge 0')+' (soddisfatta).'},
+      {do:'Eleva al quadrato e risolvi.',mo:M('2x = 16 \\;\\Rightarrow\\; x = 8')},
+      {do:'Verifica.',mo:M(SQ('16')+' = 4')+' ✓'}],
+     sol:M('x = 8')+'.'}
   ]
 };
 
